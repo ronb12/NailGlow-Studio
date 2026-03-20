@@ -583,6 +583,15 @@ td{padding:10px 14px;font-size:0.85rem;}
       <div style="margin-top:1rem"><button class="btn btn-primary" onclick="saveSettings()">Save All Settings</button></div>
     </div>
   </div>
+  <div class="card" style="margin-top:1.25rem;">
+    <div class="card-hdr"><span class="card-title">Data backup · SaaS migration</span></div>
+    <p style="font-size:0.8rem;color:var(--smoke);margin-bottom:0.75rem;">Export JSON for backups or a future multi-tenant hosted backend (see <code>docs/SAAS_ARCHITECTURE.md</code> in the BradleyVS dashboard repo).</p>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">
+      <button type="button" class="btn btn-gold" onclick="exportNailGlowData()">⬇ Export backup</button>
+      <input type="file" id="ng-import-backup" accept="application/json,.json" style="display:none" onchange="importNailGlowData(event)">
+      <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('ng-import-backup').click()">⬆ Import backup</button>
+    </div>
+  </div>
 </div>
 
 
@@ -919,13 +928,19 @@ function checkout(id) {
        || DB.walkin.find(function(x) { return x.id === id; });
   if (!a) return;
   checkoutId = id;
+  var taxR = parseFloat(DB.settings.taxRate) || 0;
+  var tax = Math.round(a.price * (taxR / 100) * 100) / 100;
+  var taxLine = tax > 0
+    ? '<div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--smoke);margin-top:6px;"><span>Tax (' + taxR + '%)</span><span>' + fmt(tax) + '</span></div>'
+    : '';
   $('checkoutContent').innerHTML =
     '<div style="background:var(--rose-pale);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
     + '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
     + '<span style="font-weight:600">' + a.service + '</span>'
     + '<span style="font-size:1.4rem;font-weight:700;color:var(--rose)">' + fmt(a.price) + '</span>'
     + '</div>'
-    + '<div style="font-size:0.8rem;color:var(--smoke)">Client: ' + a.client + ' · Tech: ' + a.tech + '</div>'
+    + taxLine
+    + '<div style="font-size:0.8rem;color:var(--smoke);margin-top:8px;">Client: ' + a.client + ' · Tech: ' + a.tech + '</div>'
     + (a.color ? '<div style="font-size:0.78rem;color:var(--mauve);margin-top:4px">💅 ' + a.color + '</div>' : '')
     + '</div>'
     + '<div class="field"><label>Tip ($)</label><input id="co-tip" type="number" placeholder="0" value="0"></div>'
@@ -943,8 +958,14 @@ function completeCheckout() {
   var tip    = parseFloat($('co-tip').value) || 0;
   var method = $('co-method').value;
   var email  = $('co-email').value;
+  var taxR   = parseFloat(DB.settings.taxRate) || 0;
+  var tax    = Math.round(a.price * (taxR / 100) * 100) / 100;
+  var total  = Math.round((a.price + tax + tip) * 100) / 100;
+
   a.status = 'Completed';
   a.tip = tip;
+  a.tax = tax;
+  a.grandTotal = total;
 
   var tx = {
     id: Date.now(),
@@ -952,15 +973,16 @@ function completeCheckout() {
     client: a.client,
     service: a.service,
     tech: a.tech,
-    amount: a.price + tip,
+    amount: total,
     tip: tip,
+    tax: tax,
     method: method,
     email: email
   };
   DB.transactions.push(tx);
-  DB.weeklyRev[new Date().getDay()] += a.price + tip;
+  DB.weeklyRev[new Date().getDay()] += total;
 
-  // Update technician stats
+  // Update technician stats (commission on pre-tax service price)
   var tech = DB.techs.find(function(t) { return t.name === a.tech; });
   if (tech) {
     tech.services++;
@@ -970,11 +992,15 @@ function completeCheckout() {
   var client = DB.clients.find(function(cl) { return cl.name === a.client; });
   if (client) {
     client.visits++;
-    client.spent = Math.round((client.spent + a.price + tip) * 100) / 100;
+    client.spent = Math.round((client.spent + total) * 100) / 100;
     client.lastVisit = new Date().toLocaleDateString();
   }
 
   saveDB();
+
+  if (method === 'Card (Stripe)') {
+    openStripeCheckout(total, a.service + ' — ' + a.client);
+  }
 
   // Send receipt email if provided
   if (email) sendReceiptEmail(tx, email);
@@ -986,7 +1012,7 @@ function completeCheckout() {
   renderAppts();
   updateDashboard();
   renderReports();
-  showToast('✅ Checkout complete! ' + fmt(a.price + tip) + ' received.', 'success');
+  showToast('✅ Checkout complete! ' + fmt(total) + ' received.' + (tax > 0 ? ' (incl. ' + fmt(tax) + ' tax)' : ''), 'success');
 }
 
 // ── WALK-IN ───────────────────────────────────────
@@ -1384,10 +1410,14 @@ function sendEmailConfirmation(appt, email) {
 
 function sendReceiptEmail(tx, email) {
   var subject = encodeURIComponent('Receipt — ' + DB.settings.shopName);
+  var taxLine = (tx.tax && tx.tax > 0) ? 'Tax: ' + fmt(tx.tax) + '\n' : '';
   var body = encodeURIComponent(
     'Thank you ' + tx.client + '!\n\n'
     + 'Service: ' + tx.service + '\n'
-    + 'Amount: ' + fmt(tx.amount) + (tx.tip > 0 ? ' (incl. ' + fmt(tx.tip) + ' tip)' : '') + '\n'
+    + 'Subtotal: ' + fmt(tx.amount - (tx.tip || 0) - (tx.tax || 0)) + '\n'
+    + taxLine
+    + 'Tip: ' + fmt(tx.tip || 0) + '\n'
+    + 'Total: ' + fmt(tx.amount) + '\n'
     + 'Technician: ' + tx.tech + '\n'
     + 'Date: ' + tx.date + '\n'
     + 'Payment: ' + tx.method + '\n\n'
@@ -1419,12 +1449,17 @@ function openStripeCheckout(amount, description) {
   console.log('Stripe charge:', amount, description);
 }
 
+function ngLineTotal(a) {
+  if (a.grandTotal != null) return a.grandTotal;
+  return a.price + (a.tip || 0) + (a.tax || 0);
+}
+
 // ── DASHBOARD ─────────────────────────────────────
 function updateDashboard() {
   var todStr = today();
   var todAppts = DB.appointments.concat(DB.walkin).filter(function(a) { return a.date === todStr; });
   var done = todAppts.filter(function(a) { return a.status === 'Completed'; });
-  var rev = done.reduce(function(s,a) { return s + a.price + (a.tip || 0); }, 0);
+  var rev = done.reduce(function(s,a) { return s + ngLineTotal(a); }, 0);
   var queue = DB.walkin.filter(function(w) { return w.status === 'Scheduled'; }).length;
 
   var set = function(id, val) { var el=$(id); if(el) el.textContent = val; };
@@ -1445,7 +1480,7 @@ function updateDashboard() {
             + '<div class="slot-time">' + (a.time || 'Walk-In') + '</div>'
             + '<div><div class="slot-client">' + a.client + '</div><div class="slot-svc">' + a.service + ' · ' + a.tech + (a.color ? ' · 💅 ' + a.color : '') + '</div></div>'
             + '<span class="badge ' + (a.status==='Completed'?'badge-green':a.status==='No-Show'?'badge-rose':'badge-gold') + '" style="margin-left:auto">' + a.status + '</span>'
-            + '<div class="slot-price">' + fmt(a.price) + '</div>'
+            + '<div class="slot-price">' + (a.status === 'Completed' ? fmt(ngLineTotal(a)) : fmt(a.price)) + '</div>'
             + '</div>';
         }).join('')
       : '<div style="color:var(--smoke);font-style:italic;font-size:0.85rem;padding:1rem 0;text-align:center;">No appointments today. ✨</div>';
@@ -1502,6 +1537,65 @@ function saveSettings() {
   });
   saveDB();
   showToast('✅ Settings saved!', 'success');
+}
+
+function exportNailGlowData() {
+  var blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'nailglow-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Backup downloaded', 'success');
+}
+
+function importNailGlowData(ev) {
+  var f = ev.target.files[0];
+  if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function() {
+    try {
+      var p = JSON.parse(reader.result);
+      if (!p || typeof p !== 'object') throw new Error('Invalid file');
+      if (!confirm('Replace ALL NailGlow data in this browser with this backup?')) return;
+      var merged = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      Object.keys(DEFAULT_DATA).forEach(function(k) {
+        if (p[k] !== undefined) merged[k] = JSON.parse(JSON.stringify(p[k]));
+      });
+      if (!merged.users || !merged.users.length) merged.users = DEFAULT_DATA.users;
+      DB = merged;
+      saveDB();
+      if (currentUser) {
+        var em = currentUser.email;
+        currentUser = DB.users.find(function(u) { return u.email.toLowerCase() === String(em).toLowerCase(); }) || null;
+      }
+      if (!currentUser) {
+        showLogin();
+      } else {
+        if ($('current-user-name')) $('current-user-name').textContent = currentUser.name;
+        if ($('current-user-role')) $('current-user-role').textContent = ROLES[currentUser.role] || currentUser.role;
+        hideLogin();
+      }
+      loadSettingsForm();
+      populateServiceSelects();
+      populateTechSelects();
+      renderAppts();
+      renderClients('');
+      renderTechs();
+      renderServices();
+      renderProducts();
+      renderInspo();
+      renderStaff();
+      renderReports();
+      updateDashboard();
+      applyRolePermissions();
+      showToast('Import complete', 'success');
+    } catch (err) {
+      showToast('Import failed: ' + err.message, 'error');
+    }
+    ev.target.value = '';
+  };
+  reader.readAsText(f);
 }
 
 // ── INIT ──────────────────────────────────────────

@@ -1240,7 +1240,7 @@ function renderInspo() {
       return '<div style="width:22px;height:22px;border-radius:50%;background:' + c + ';border:2px solid var(--border);"></div>';
     }).join('');
     var diffColor = d.diff === 'Easy' ? '#ff69b4' : d.diff === 'Medium' ? '#e91e8c' : '#800050';
-    return '<div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.25rem;box-shadow:0 2px 12px var(--shadow);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">'
+    return '<div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.25rem;box-shadow:0 2px 12px var(--shadow);transition:all 0.2s;" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
       + '<div style="display:flex;gap:4px;margin-bottom:0.75rem;">' + swatches + '</div>'
       + '<div style="font-weight:700;font-size:0.95rem;margin-bottom:3px">' + d.name + '</div>'
       + '<div style="font-size:0.75rem;color:var(--smoke);margin-bottom:6px">' + d.style + ' · ' + d.shape + ' · <span style="color:' + diffColor + '">' + d.diff + '</span></div>'
@@ -1369,25 +1369,15 @@ function sendSMSReminder(appt) {
 function sendEmailConfirmation(appt, email) {
   var subject = encodeURIComponent('Appointment Confirmed — ' + DB.settings.shopName);
   var body = encodeURIComponent(
-    'Hi ' + appt.client + ',
-
-'
-    + 'Your appointment is confirmed!
-
-'
-    + 'Service: ' + appt.service + '
-'
-    + 'Date: ' + appt.date + '
-'
-    + 'Time: ' + appt.time + '
-'
-    + 'Technician: ' + appt.tech + '
-'
-    + 'Price: ' + fmt(appt.price) + '
-
-'
-    + 'See you soon!
-' + DB.settings.shopName
+    'Hi ' + appt.client + ',\n\n'
+    + 'Your appointment is confirmed!\n\n'
+    + 'Service: ' + appt.service + '\n'
+    + 'Date: ' + appt.date + '\n'
+    + 'Time: ' + appt.time + '\n'
+    + 'Technician: ' + appt.tech + '\n'
+    + 'Price: ' + fmt(appt.price) + '\n\n'
+    + 'See you soon!\n'
+    + DB.settings.shopName
   );
   window.open('mailto:' + email + '?subject=' + subject + '&body=' + body);
 }
@@ -1395,20 +1385,12 @@ function sendEmailConfirmation(appt, email) {
 function sendReceiptEmail(tx, email) {
   var subject = encodeURIComponent('Receipt — ' + DB.settings.shopName);
   var body = encodeURIComponent(
-    'Thank you ' + tx.client + '!
-
-'
-    + 'Service: ' + tx.service + '
-'
-    + 'Amount: ' + fmt(tx.amount) + (tx.tip > 0 ? ' (incl. ' + fmt(tx.tip) + ' tip)' : '') + '
-'
-    + 'Technician: ' + tx.tech + '
-'
-    + 'Date: ' + tx.date + '
-'
-    + 'Payment: ' + tx.method + '
-
-'
+    'Thank you ' + tx.client + '!\n\n'
+    + 'Service: ' + tx.service + '\n'
+    + 'Amount: ' + fmt(tx.amount) + (tx.tip > 0 ? ' (incl. ' + fmt(tx.tip) + ' tip)' : '') + '\n'
+    + 'Technician: ' + tx.tech + '\n'
+    + 'Date: ' + tx.date + '\n'
+    + 'Payment: ' + tx.method + '\n\n'
     + 'Thank you for visiting ' + DB.settings.shopName + '!'
   );
   window.open('mailto:' + email + '?subject=' + subject + '&body=' + body);

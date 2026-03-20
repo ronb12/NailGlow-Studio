@@ -187,8 +187,28 @@ td{padding:10px 14px;font-size:0.85rem;}
         <input id="login-pass" type="password" placeholder="Your password" autocomplete="current-password" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
       </div>
       <div id="login-err" style="color:#e91e8c;font-size:0.8rem;min-height:1rem;"></div>
-      <button onclick="doLogin()" style="background:#e91e8c;color:white;border:none;border-radius:30px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;">Sign In 💅</button>
+      <button type="button" onclick="doLogin()" style="background:#e91e8c;color:white;border:none;border-radius:30px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;">Sign In 💅</button>
+      <div style="text-align:center;">
+        <button type="button" onclick="openForgotPasswordModal()" style="background:none;border:none;color:#8b1a4a;font-size:0.82rem;text-decoration:underline;cursor:pointer;padding:0.35rem 0;font-family:'Jost',sans-serif;">Forgot password?</button>
+      </div>
       <div style="text-align:center;font-size:0.75rem;color:#b06080;">First visit? Create your owner password on the setup screen. No default credentials are in this repository.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot password (browser-only app — no email reset without a server) -->
+<div class="modal-bg" id="forgotPasswordModal" style="z-index:10001;">
+  <div class="modal" style="max-width:440px;">
+    <h3>🔑 Forgot password?</h3>
+    <p style="font-size:0.88rem;color:var(--smoke);line-height:1.5;margin-bottom:0.75rem;">NailGlow runs in your <strong>browser</strong>. Passwords are stored in <strong>local storage</strong> on this device — there is no server to email you a reset link.</p>
+    <p style="font-size:0.88rem;color:var(--ink);line-height:1.5;margin-bottom:0.75rem;"><strong>Before you reset:</strong> If you still have a recent <strong>Settings → Export backup</strong> JSON file, keep it safe. A full reset erases all salon data in this browser unless you import a backup afterward.</p>
+    <p style="font-size:0.85rem;color:#b5006e;margin-bottom:0.5rem;"><strong>Reset this device</strong> removes saved data, then you can set a new owner password (same as first visit).</p>
+    <label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#800050;">Type <strong>RESET</strong> to confirm</label>
+    <input id="forgot-confirm-input" type="text" autocomplete="off" placeholder="RESET" style="width:100%;margin-top:6px;background:var(--rose-pale);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'Jost',sans-serif;font-size:0.9rem;">
+    <div id="forgot-err" style="color:#e91e8c;font-size:0.8rem;min-height:1.1rem;margin-top:0.5rem;"></div>
+    <div class="modal-actions" style="flex-wrap:wrap;">
+      <button type="button" class="btn btn-outline btn-sm" onclick="closeForgotPasswordModal()">Cancel</button>
+      <button type="button" class="btn btn-danger btn-sm" onclick="confirmForgotPasswordReset()">Erase data &amp; start over</button>
     </div>
   </div>
 </div>
@@ -740,10 +760,43 @@ function needsOwnerPasswordSetup() {
 }
 
 function showLogin() {
+  closeForgotPasswordModal();
   var su = document.getElementById('setupScreen');
   if (su) su.style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('appScreen').style.display = 'none';
+}
+
+function openForgotPasswordModal() {
+  var m = document.getElementById('forgotPasswordModal');
+  var inp = document.getElementById('forgot-confirm-input');
+  var err = document.getElementById('forgot-err');
+  if (inp) inp.value = '';
+  if (err) err.textContent = '';
+  if (m) m.classList.add('open');
+}
+
+function closeForgotPasswordModal() {
+  var m = document.getElementById('forgotPasswordModal');
+  if (m) m.classList.remove('open');
+}
+
+function confirmForgotPasswordReset() {
+  var err = document.getElementById('forgot-err');
+  var inp = document.getElementById('forgot-confirm-input');
+  if (!inp || String(inp.value).trim().toUpperCase() !== 'RESET') {
+    if (err) err.textContent = 'Type RESET in the box to confirm.';
+    return;
+  }
+  try {
+    localStorage.removeItem(STORE_KEY);
+  } catch (e) {
+    if (err) err.textContent = 'Could not clear storage: ' + e.message;
+    return;
+  }
+  closeForgotPasswordModal();
+  showToast('Storage cleared — reloading…', 'info');
+  setTimeout(function() { location.reload(); }, 400);
 }
 
 function showSetupScreen() {

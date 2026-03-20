@@ -1,76 +1,1542 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="NailGlow Studio — nail salon business management by Bradley Virtual Solutions" />
-  <title>NailGlow Studio — Nail Salon Management</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NailGlow Studio — Shop Management</title>
+<style>@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Jost:wght@300;400;500;600;700&display=swap");
+/* Toast */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:#2a0018;color:white;padding:10px 20px;border-radius:30px;font-size:0.85rem;z-index:9998;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-success{background:#1a7a4a;}
+.toast-error{background:#c0392b;}
+.toast-info{background:#1a4a7a;}
+
+</style>
+<style>
+:root{
+  --rose:#e91e8c;--rose2:#f06dab;--rose-light:#ffe0f2;--rose-pale:#fff0f8;
+  --blush:#ffc0e0;--mauve:#b5006e;--mauve2:#800050;
+  --gold:#ff69b4;--gold-light:#ffd6ee;
+  --ink:#2a0018;--smoke:#b06080;--border:#ffb3d9;
+  --white:#ffffff;--cream:#fff5fb;--shadow:rgba(233,30,140,0.13);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Jost',sans-serif;background:var(--rose-pale);color:var(--ink);min-height:100vh;}
+
+/* Floral pattern header */
+header{background:linear-gradient(135deg,#800050,#b5006e);position:sticky;top:0;z-index:100;overflow:hidden;}
+header::before{content:'✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿';position:absolute;top:0;left:0;right:0;font-size:10px;color:rgba(255,255,255,0.12);letter-spacing:8px;padding:3px;overflow:hidden;white-space:nowrap;}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:66px;position:relative;z-index:1;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-gem{font-size:1.8rem;}
+.logo-name{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;color:var(--white);letter-spacing:0.04em;line-height:1;}
+.logo-sub{font-size:0.6rem;color:rgba(255,220,240,0.8);letter-spacing:0.18em;text-transform:uppercase;}
+.header-stats{display:flex;gap:2rem;}
+.hdr-stat{text-align:center;}
+.hdr-stat-val{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:#ffe0f2;}
+.hdr-stat-lbl{font-size:0.58rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.12em;}
+
+nav{background:linear-gradient(90deg,#e91e8c,#f06dab);border-bottom:1px solid #ff9dd5;}
+.nav-inner{display:flex;overflow-x:auto;padding:0 1.5rem;}
+.nav-btn{padding:13px 18px;border:none;background:transparent;color:rgba(255,255,255,0.85);font-family:'Jost',sans-serif;font-size:0.82rem;font-weight:500;letter-spacing:0.04em;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;white-space:nowrap;}
+.nav-btn.active,.nav-btn:hover{color:var(--white);border-bottom-color:#ffe0f2;}
+
+.container{max-width:1300px;margin:0 auto;padding:2rem;}
+.panel{display:none;}.panel.active{display:block;animation:bloom 0.35s ease;}
+@keyframes bloom{from{opacity:0;transform:translateY(10px) scale(0.99)}to{opacity:1;transform:none}}
+
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:700;color:var(--ink);letter-spacing:0.01em;}
+.section-title span{color:#e91e8c;}
+
+/* Buttons */
+.btn{padding:10px 22px;border:none;border-radius:30px;font-family:'Jost',sans-serif;font-weight:600;font-size:0.82rem;cursor:pointer;transition:all 0.25s;letter-spacing:0.04em;}
+.btn-primary{background:var(--rose);color:var(--white);}
+.btn-primary:hover{background:var(--mauve);box-shadow:0 4px 16px rgba(233,30,140,0.35);}
+.btn-gold{background:var(--gold);color:var(--white);}
+.btn-gold:hover{background:var(--mauve);box-shadow:0 4px 16px rgba(233,30,140,0.35);}
+.btn-outline{background:transparent;border:1.5px solid var(--rose);color:var(--rose);}
+.btn-outline:hover{background:var(--rose-light);}
+.btn-sm{padding:6px 16px;font-size:0.78rem;}
+.btn-danger{background:rgba(200,100,122,0.1);border:1px solid var(--rose);color:var(--rose);}
+.btn-danger:hover{background:var(--rose);color:white;}
+
+/* Cards */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:1rem;}
+.card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.5rem;box-shadow:0 2px 16px var(--shadow);}
+.card::before{content:'';display:block;height:3px;background:linear-gradient(90deg,#e91e8c,#ff69b4);border-radius:12px 12px 0 0;margin:-1.5rem -1.5rem 1rem -1.5rem;}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:700;letter-spacing:0.03em;color:#800050;}
+
+/* KPIs */
+.kpi-val{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:700;color:#e91e8c;line-height:1;}
+.kpi-lbl{font-size:0.7rem;color:var(--smoke);text-transform:uppercase;letter-spacing:0.1em;margin-top:3px;}
+.kpi-note{font-size:0.75rem;color:var(--gold);margin-top:4px;}
+
+/* Forms */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#800050;}
+.field input,.field select,.field textarea{background:var(--rose-pale);border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-family:'Jost',sans-serif;font-size:0.875rem;color:var(--ink);outline:none;transition:border-color 0.2s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#e91e8c;box-shadow:0 0 0 2px rgba(233,30,140,0.12);}
+.field textarea{resize:vertical;min-height:80px;}
+
+/* Tables */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);box-shadow:0 2px 12px var(--shadow);}
+table{width:100%;border-collapse:collapse;}
+thead{background:linear-gradient(90deg,#800050,#e91e8c);}
+th{padding:11px 14px;text-align:left;font-family:'Jost',sans-serif;font-size:0.72rem;font-weight:600;color:var(--white);text-transform:uppercase;letter-spacing:0.07em;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--rose-pale);transition:background 0.15s;}
+tbody tr:hover{background:var(--rose-pale);}
+td{padding:10px 14px;font-size:0.85rem;}
+.badge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:0.7rem;font-weight:600;}
+.badge-green{background:#e8f8f0;color:#1a7a4a;}
+.badge-rose{background:#ffe0f2;color:#800050;}
+.badge-gold{background:var(--gold-light);color:#7a5a1a;}
+.badge-blue{background:#e8f0f8;color:#1a4a7a;}
+
+/* Nail polish swatch */
+.swatch{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:inline-block;vertical-align:middle;margin-right:6px;}
+
+/* Service card */
+.svc-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:1rem;margin-bottom:8px;transition:all 0.2s;}
+.svc-card:hover{border-color:#e91e8c;box-shadow:0 2px 12px rgba(233,30,140,0.2);}
+.svc-icon{font-size:1.5rem;min-width:36px;text-align:center;}
+.svc-name{font-weight:600;font-size:0.9rem;}
+.svc-desc{font-size:0.73rem;color:var(--smoke);}
+.svc-price{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:#e91e8c;margin-left:auto;}
+
+/* Technician card */
+.tech-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.25rem;text-align:center;transition:all 0.2s;box-shadow:0 2px 12px var(--shadow);}
+.tech-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px var(--shadow);}
+.tech-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#e91e8c,#800050);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--white);margin:0 auto 0.75rem;}
+.tech-name{font-weight:700;font-size:0.95rem;}
+.tech-spec{font-size:0.73rem;color:var(--smoke);}
+.tech-stats{display:flex;justify-content:center;gap:1.5rem;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);}
+.tech-stat-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:#e91e8c;}
+.tech-stat-lbl{font-size:0.62rem;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em;}
+
+/* Appointment slot */
+.appt-slot{display:flex;gap:1rem;align-items:center;padding:10px 14px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px;background:var(--white);transition:all 0.2s;}
+.appt-slot:hover{border-color:#e91e8c;box-shadow:0 2px 10px rgba(233,30,140,0.2);}
+.slot-time{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:#e91e8c;min-width:60px;}
+.slot-client{font-weight:600;font-size:0.88rem;}
+.slot-svc{font-size:0.73rem;color:var(--smoke);}
+.slot-price{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:var(--mauve);margin-left:auto;}
+
+/* Progress */
+.prog-wrap{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px;}
+.prog-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#e91e8c,#ff69b4);transition:width 0.6s ease;}
+
+/* Revenue bars */
+.bar-chart{display:flex;align-items:flex-end;gap:5px;height:110px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:3px;}
+.bar{width:100%;background:linear-gradient(180deg,#f06dab,#e91e8c);border-radius:4px 4px 0 0;transition:height 0.6s;min-height:4px;}
+.bar-lbl{font-size:0.6rem;color:var(--smoke);font-weight:600;text-transform:uppercase;}
+.bar-val{font-size:0.62rem;color:var(--mauve);font-weight:700;}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(42,26,32,0.65);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-bg.open{display:flex;}
+.modal{background:var(--white);border-radius:20px;padding:2rem;width:min(580px,92vw);max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px var(--shadow);}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;margin-bottom:1.25rem;color:var(--ink);}
+.modal-actions{display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem;}
+
+/* Color picker row */
+.color-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.color-chip{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:all 0.2s;}
+.color-chip:hover,.color-chip.selected{border-color:#e91e8c;transform:scale(1.2);}
+
+@media(max-width:640px){.header-stats{display:none;}.container{padding:1rem;}.grid-4{grid-template-columns:repeat(2,1fr);}}
+
+/* Toast */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:#2a0018;color:white;padding:10px 20px;border-radius:30px;font-size:0.85rem;z-index:9998;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-success{background:#1a7a4a;}
+.toast-error{background:#c0392b;}
+.toast-info{background:#1a4a7a;}
+
+</style>
 </head>
 <body>
-  <div class="bg-grid"></div>
-  <header class="header">
-    <div class="logo"><span class="logo-icon">✨</span> NailGlow <strong>Studio</strong></div>
-    <nav class="nav">
-      <a href="#features">Features</a>
-      <a href="#salon-day">Salon day</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </header>
 
-  <main>
-    <section class="hero">
-      <p class="eyebrow">Bradley Virtual Solutions</p>
-      <h1>Nail salon ops, <span class="accent">glowing</span> and organized</h1>
-      <p class="lead">Booking buffers, dip/gel services, station hygiene checklists, and retail — built for studios that juggle walk-ins and regulars.</p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="#features">See features</a>
-        <a class="btn btn-ghost" href="https://bradleyvs-app-dashboard.vercel.app/" target="_blank" rel="noopener">Portfolio dashboard ↗</a>
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Login Screen -->
+<div id="loginScreen" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#800050,#e91e8c);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:white;border-radius:24px;padding:2.5rem;width:min(380px,90vw);box-shadow:0 24px 60px rgba(128,0,80,0.3);">
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div style="font-size:2.5rem">💎</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:#2a0018;">NailGlow Studio</div>
+      <div style="font-size:0.75rem;color:#b06080;letter-spacing:0.1em;text-transform:uppercase;">Business Management</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+      <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#8b1a4a;">Email</label>
+        <input id="login-email" type="email" placeholder="owner@nailglow.com" value="owner@nailglow.com" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
       </div>
-    </section>
-
-    <section id="features" class="section">
-      <h2>NailGlow Studio toolkit</h2>
-      <div class="cards">
-        <article class="card">
-          <h3>💅 Service menu</h3>
-          <p>Manicure tiers, gel builder, art add-ons, and soak-off policies — keep pricing consistent across techs.</p>
-        </article>
-        <article class="card">
-          <h3>⏱ Smart scheduling</h3>
-          <p>Buffer time for dries and fills; color-coded stations so no double-booked lamps.</p>
-        </article>
-        <article class="card">
-          <h3>🧴 Retail &amp; loyalty</h3>
-          <p>OPI shelves, cuticle oils, stamp cards — optional points so guests come back.</p>
-        </article>
-        <article class="card">
-          <h3>✅ Compliance notes</h3>
-          <p>Sanitation logs reminders and consent snippets for before/after photos.</p>
-        </article>
+      <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#8b1a4a;">Password</label>
+        <input id="login-pass" type="password" placeholder="••••••••" value="nailglow123" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
       </div>
-    </section>
+      <div id="login-err" style="color:#e91e8c;font-size:0.8rem;min-height:1rem;"></div>
+      <button onclick="doLogin()" style="background:#e91e8c;color:white;border:none;border-radius:30px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;">Sign In 💅</button>
+      <div style="text-align:center;font-size:0.75rem;color:#b06080;">Default: owner@nailglow.com / nailglow123</div>
+    </div>
+  </div>
+</div>
 
-    <section id="salon-day" class="section section-alt">
-      <h2>A smooth salon day</h2>
-      <ol class="steps">
-        <li><strong>Prep</strong> — Stations stocked, timers synced.</li>
-        <li><strong>Flow</strong> — Guests checked in with service codes.</li>
-        <li><strong>Art</strong> — Reference snaps attached to appointments.</li>
-        <li><strong>Wrap</strong> — Tips, retail attach, rebook prompt.</li>
-      </ol>
-    </section>
+<!-- App Screen wrapper -->
+<div id="appScreen" style="display:none;">
 
-    <section id="contact" class="section">
-      <h2>Portfolio entry</h2>
-      <p class="muted">Public site for the <strong>NailGlow Studio</strong> product. Point a custom domain in Vercel whenever you’re ready.</p>
-      <p class="muted"><a href="https://github.com/ronb12/NailGlow-Studio" target="_blank" rel="noopener">GitHub: ronb12/NailGlow-Studio</a></p>
-    </section>
-  </main>
+<!-- Modals -->
+<div class="modal-bg" id="apptModal">
+  <div class="modal">
+    <h3>💅 New Appointment</h3>
+    <div class="form-grid">
+      <div class="field"><label>Client Name</label><input id="a-client" placeholder="Jane Smith"></div>
+      <div class="field"><label>Phone</label><input id="a-phone" placeholder="(504) 555-0100"></div>
+      <div class="field"><label>Service</label><select id="a-service"></select></div>
+      <div class="field"><label>Technician</label><select id="a-tech"><option>Any Available</option></select></div>
+      <div class="field"><label>Date</label><input type="date" id="a-date"></div>
+      <div class="field"><label>Time</label>
+        <select id="a-time">
+          <option>9:00 AM</option><option>9:30 AM</option><option>10:00 AM</option><option>10:30 AM</option>
+          <option>11:00 AM</option><option>11:30 AM</option><option>12:00 PM</option><option>12:30 PM</option>
+          <option>1:00 PM</option><option>1:30 PM</option><option>2:00 PM</option><option>2:30 PM</option>
+          <option>3:00 PM</option><option>3:30 PM</option><option>4:00 PM</option><option>4:30 PM</option>
+          <option>5:00 PM</option><option>5:30 PM</option>
+        </select>
+      </div>
+      <div class="field"><label>Recurring</label><select id="a-recur"><option value="none">One-time</option><option value="weekly">Weekly</option><option value="biweekly">Every 2 Weeks</option><option value="monthly">Monthly</option></select></div><div class="field"><label>Client Email</label><input id="a-email" type="email" placeholder="For confirmation"></div><div class="field" style="grid-column:1/-1"><label>Nail Color / Design Notes</label><input id="a-color" placeholder="Nude pink with gold accent, ref: photo on file..."></div>
+      <div class="field" style="grid-column:1/-1"><label>Additional Notes</label><textarea id="a-notes" placeholder="Sensitive cuticles, prefers no drill..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('apptModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAppt()">Book Appointment</button>
+    </div>
+  </div>
+</div>
 
-  <footer class="footer">
-    <p>© 2026 Bradley Virtual Solutions, LLC · NailGlow Studio</p>
-  </footer>
-  <script src="app.js"></script>
+<div class="modal-bg" id="clientModal">
+  <div class="modal">
+    <h3>👤 Add Client</h3>
+    <div class="form-grid">
+      <div class="field"><label>Full Name</label><input id="c-name" placeholder="Jane Smith"></div>
+      <div class="field"><label>Phone</label><input id="c-phone" placeholder="(504) 555-0100"></div>
+      <div class="field"><label>Email</label><input id="c-email" placeholder="jane@email.com"></div>
+      <div class="field"><label>Birthday (for promo)</label><input type="date" id="c-bday"></div>
+      <div class="field"><label>Preferred Tech</label><select id="c-tech"><option>No Preference</option></select></div>
+      <div class="field"><label>Allergies</label><input id="c-allergy" placeholder="Acrylic monomer, gel UV..."></div>
+      <div class="field" style="grid-column:1/-1"><label>Style Preferences</label><textarea id="c-prefs" placeholder="Loves gel, always does coffin shape, favorite color is nude pink..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('clientModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveClient()">Add Client</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="techModal">
+  <div class="modal">
+    <h3>💅 Add Technician</h3>
+    <div class="form-grid">
+      <div class="field"><label>Full Name</label><input id="t-name" placeholder="Lisa Nguyen"></div>
+      <div class="field"><label>Phone</label><input id="t-phone" placeholder="(504) 555-0200"></div>
+      <div class="field"><label>Specialties</label><input id="t-spec" placeholder="Gel, Acrylics, Nail Art"></div>
+      <div class="field"><label>Commission %</label><input id="t-comm" type="number" placeholder="50" value="50"></div>
+      <div class="field"><label>License #</label><input id="t-lic" placeholder="NL-12345"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('techModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTech()">Add Technician</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="checkoutModal">
+  <div class="modal">
+    <h3>✨ Checkout</h3>
+    <div id="checkoutContent"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('checkoutModal')">Cancel</button>
+      <button class="btn btn-gold" onclick="completeCheckout()">✓ Complete & Pay</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-gem">💎</div>
+      <div><div class="logo-name">NailGlow Studio</div><div class="logo-sub">Business Management</div></div>
+    </div>
+    <div class="header-stats">
+      <div class="hdr-stat"><div class="hdr-stat-val" id="hdr-rev">$0</div><div class="hdr-stat-lbl">Today's Revenue</div></div>
+      <div class="hdr-stat"><div class="hdr-stat-val" id="hdr-appts">0</div><div class="hdr-stat-lbl">Appointments</div></div>
+      <div class="hdr-stat"><div class="hdr-stat-val" id="hdr-queue">0</div><div class="hdr-stat-lbl">In Queue</div></div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+      <div style="text-align:right">
+        <div id="current-user-name" style="font-size:0.8rem;color:white;font-weight:600;">—</div>
+        <div id="current-user-role" style="font-size:0.65rem;color:rgba(255,220,240,0.7);text-transform:uppercase;letter-spacing:0.1em;">—</div>
+      </div>
+      <button onclick="doLogout()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:6px 14px;color:white;font-size:0.75rem;cursor:pointer;">Logout</button>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="showPanel('dashboard',this)" data-panel="dashboard">✨ Dashboard</button>
+    <button class="nav-btn" onclick="showPanel('appointments',this)" data-panel="appointments">📅 Appointments</button>
+    <button class="nav-btn" onclick="showPanel('walkin',this)" data-panel="walkin">🚶 Walk-Ins</button>
+    <button class="nav-btn" onclick="showPanel('clients',this)" data-panel="clients">👥 Clients</button>
+    <button class="nav-btn" onclick="showPanel('technicians',this)" data-panel="technicians">💅 Technicians</button>
+    <button class="nav-btn" onclick="showPanel('services',this)" data-panel="services">🛠 Services</button>
+    <button class="nav-btn" onclick="showPanel('products',this)" data-panel="products">🧴 Products</button>
+    <button class="nav-btn" onclick="showPanel('nailinspo',this)" data-panel="nailinspo">🎨 Nail Inspo</button>
+    <button class="nav-btn" onclick="showPanel('reports',this)" data-panel="reports">📈 Reports</button>
+    <button class="nav-btn" onclick="showPanel('settings',this)" data-panel="settings">⚙️ Settings</button>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- DASHBOARD -->
+<div id="panel-dashboard" class="panel active">
+  <div class="section-hdr">
+    <div class="section-title">Today's <span>Studio</span></div>
+    <div style="display:flex;gap:0.75rem;">
+      <button class="btn btn-outline btn-sm" onclick="showPanel('walkin',document.querySelector('[data-panel="walkin"]'))">+ Walk-In</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('apptModal')">+ Book Appointment</button>
+    </div>
+  </div>
+  <div class="grid-4" style="margin-bottom:1.5rem;">
+    <div class="card"><div class="kpi-lbl">Today's Revenue</div><div class="kpi-val" id="d-rev">$0</div><div class="kpi-note" id="d-rev-note">0 services completed</div></div>
+    <div class="card"><div class="kpi-lbl">Appointments</div><div class="kpi-val" id="d-appts">0</div><div class="kpi-note">scheduled today</div></div>
+    <div class="card"><div class="kpi-lbl">Walk-In Queue</div><div class="kpi-val" id="d-queue">0</div><div class="kpi-note">waiting</div></div>
+    <div class="card"><div class="kpi-lbl">Technicians On</div><div class="kpi-val" id="d-techs">0</div><div class="kpi-note">on the floor</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Today's Schedule</span><button class="btn btn-primary btn-sm" onclick="openModal('apptModal')">+ Add</button></div>
+      <div id="todaySchedule"><div style="color:var(--smoke);font-style:italic;font-size:0.85rem;padding:1rem 0;text-align:center;">No appointments yet. ✨</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Weekly Revenue</span></div>
+      <div class="bar-chart" id="weekChart"></div>
+      <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:0.75rem;display:flex;justify-content:space-between;">
+        <div><div style="font-size:0.7rem;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em">This Week</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--rose)" id="weekTotal">$0</div></div>
+        <div style="text-align:right"><div style="font-size:0.7rem;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em">Monthly Est.</div><div style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--mauve)" id="monthEst">$0</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:1.5rem;"></div>
+  <div class="grid-3">
+    <div class="card"><div class="card-hdr"><span class="card-title">Top Services</span></div><div id="topSvcs"><div style="color:var(--smoke);font-style:italic;font-size:0.82rem;">Complete appointments to see data.</div></div></div>
+    <div class="card"><div class="card-hdr"><span class="card-title">Technician Performance</span></div><div id="techPerf"><div style="color:var(--smoke);font-style:italic;font-size:0.82rem;">Add technicians to track performance.</div></div></div>
+    <div class="card"><div class="card-hdr"><span class="card-title">Quick Actions</span></div>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;">
+        <button class="btn btn-primary" onclick="openModal('apptModal')">📅 Book Appointment</button>
+        <button class="btn btn-gold" onclick="showPanel('walkin',document.querySelector('[data-panel="walkin"]'))">🚶 Add Walk-In</button>
+        <button class="btn btn-outline" onclick="openModal('clientModal')">👤 New Client</button>
+        <button class="btn btn-outline" onclick="showPanel('nailinspo',document.querySelector('[data-panel="nailinspo"]'))">🎨 Nail Inspo Gallery</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APPOINTMENTS -->
+<div id="panel-appointments" class="panel">
+  <div class="section-hdr">
+    <div class="section-title">Appointments</div>
+    <button class="btn btn-primary" onclick="openModal('apptModal')">+ New Appointment</button>
+  </div>
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+      <div class="field"><label>Date</label><input type="date" id="fDate" oninput="renderAppts()"></div>
+      <div class="field"><label>Technician</label><select id="fTech" onchange="renderAppts()"><option value="">All</option></select></div>
+      <div class="field"><label>Status</label><select id="fStatus" onchange="renderAppts()"><option value="">All</option><option>Scheduled</option><option>Completed</option><option>No-Show</option></select></div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr><th>Time</th><th>Client</th><th>Service</th><th>Technician</th><th>Color/Design</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody id="apptTable"><tr><td colspan="8" style="text-align:center;color:var(--smoke);padding:2rem;font-style:italic;">No appointments yet.</td></tr></tbody></table>
+  </div>
+</div>
+
+<!-- WALK-IN -->
+<div id="panel-walkin" class="panel">
+  <div class="section-hdr"><div class="section-title">Walk-In <span>Queue</span></div></div>
+  <div class="grid-2" style="margin-bottom:1.5rem;">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Add Walk-In</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Name (or "Guest")</label><input id="w-name" placeholder="Guest or Jane S."></div>
+        <div class="field"><label>Service</label><select id="w-service"></select></div>
+        <div class="field"><label>Assign Technician</label><select id="w-tech"><option>Next Available</option></select></div>
+        <div class="field"><label>Phone (optional)</label><input id="w-phone" placeholder="(504) 555-0100"></div>
+      </div>
+      <div style="margin-top:1rem;"><button class="btn btn-primary" style="width:100%" onclick="addWalkin()">Add to Queue</button></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Current Queue</span><span id="qCount" style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:#e91e8c">0</span></div>
+      <div id="walkinQueue"><div style="color:var(--smoke);font-style:italic;font-size:0.85rem;padding:1rem 0;text-align:center;">Queue is empty. ✨</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENTS -->
+<div id="panel-clients" class="panel">
+  <div class="section-hdr"><div class="section-title">Client <span>Book</span></div><button class="btn btn-primary" onclick="openModal('clientModal')">+ Add Client</button></div>
+  <div class="card" style="margin-bottom:1rem;">
+    <input style="width:100%;background:var(--rose-pale);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-family:'Jost',sans-serif;font-size:0.875rem;" placeholder="🔍 Search by name, phone, or preferences..." oninput="renderClients(this.value)">
+  </div>
+  <div class="table-wrap">
+    <table><thead><tr><th>Name</th><th>Phone</th><th>Pref. Tech</th><th>Visits</th><th>Total Spent</th><th>Last Visit</th><th>Allergies</th><th>Style Notes</th><th></th></tr></thead>
+    <tbody id="clientTable"><tr><td colspan="9" style="text-align:center;color:var(--smoke);padding:2rem;font-style:italic;">No clients yet.</td></tr></tbody></table>
+  </div>
+</div>
+
+<!-- TECHNICIANS -->
+<div id="panel-technicians" class="panel">
+  <div class="section-hdr"><div class="section-title">Our <span>Technicians</span></div><button class="btn btn-primary" onclick="openModal('techModal')">+ Add Technician</button></div>
+  <div class="grid-3" id="techCards"><div style="color:var(--smoke);font-style:italic;">No technicians added yet.</div></div>
+</div>
+
+<!-- SERVICES -->
+<div id="panel-services" class="panel">
+  <div class="section-hdr"><div class="section-title">Services & <span>Pricing</span></div></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Add Service</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Service Name</label><input id="s-name" placeholder="Gel Manicure"></div>
+        <div class="field"><label>Price ($)</label><input id="s-price" type="number" placeholder="45"></div>
+        <div class="field"><label>Duration (min)</label><input id="s-dur" type="number" placeholder="60"></div>
+        <div class="field"><label>Category</label><select id="s-cat"><option>Manicure</option><option>Pedicure</option><option>Acrylic</option><option>Gel</option><option>Nail Art</option><option>Package</option><option>Waxing</option></select></div>
+        <div class="field" style="grid-column:1/-1"><label>Description</label><input id="s-desc" placeholder="Includes nail shaping, cuticle care, gel polish..."></div>
+      </div>
+      <div style="margin-top:1rem;"><button class="btn btn-primary" onclick="addService()">Add Service</button></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Service Menu</span></div>
+      <div id="serviceMenu"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTS / INVENTORY -->
+<div id="panel-products" class="panel">
+  <div class="section-hdr"><div class="section-title">Products & <span>Inventory</span></div></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Add Product</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Product Name</label><input id="p-name" placeholder="OPI Nail Polish"></div>
+        <div class="field"><label>Category</label><select id="p-cat"><option>Nail Polish</option><option>Gel/UV</option><option>Acrylic Supplies</option><option>Tools</option><option>Sanitization</option><option>Retail</option><option>Lotions</option></select></div>
+        <div class="field"><label>Brand/Color</label><input id="p-brand" placeholder="OPI · Bubble Bath #L72"></div>
+        <div class="field"><label>Quantity</label><input id="p-qty" type="number" placeholder="10"></div>
+        <div class="field"><label>Low Stock Alert</label><input id="p-low" type="number" placeholder="3"></div>
+        <div class="field"><label>Cost ($)</label><input id="p-cost" type="number" placeholder="8.99"></div>
+        <div class="field"><label>Retail Price ($)</label><input id="p-retail" type="number" placeholder="14.99"></div>
+      </div>
+      <div style="margin-top:1rem;"><button class="btn btn-primary" onclick="addProduct()">Add Product</button></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Inventory Status</span></div>
+      <div id="productList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAIL INSPO -->
+<div id="panel-nailinspo" class="panel">
+  <div class="section-hdr"><div class="section-title">Nail <span>Inspo Gallery</span></div></div>
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="card-hdr"><span class="card-title">Save a Design</span></div>
+    <div class="form-grid">
+      <div class="field"><label>Design Name</label><input id="ins-name" placeholder="Summer Ombre Fade"></div>
+      <div class="field"><label>Style</label><select id="ins-style"><option>Solid</option><option>Ombre/Gradient</option><option>Nail Art</option><option>Floral</option><option>Geometric</option><option>French</option><option>Glitter</option><option>Chrome</option><option>Marble</option></select></div>
+      <div class="field"><label>Shape</label><select id="ins-shape"><option>Round</option><option>Square</option><option>Oval</option><option>Coffin</option><option>Almond</option><option>Stiletto</option><option>Squoval</option></select></div>
+      <div class="field"><label>Difficulty</label><select id="ins-diff"><option>Easy</option><option>Medium</option><option>Advanced</option></select></div>
+      <div class="field" style="grid-column:1/-1"><label>Color Palette (pick main colors)</label>
+        <div class="color-row" id="colorPicker">
+          <div class="color-chip" style="background:#f9c4cc" onclick="toggleColor(this,'#f9c4cc')"></div>
+          <div class="color-chip" style="background:#c8647a" onclick="toggleColor(this,'#c8647a')"></div>
+          <div class="color-chip" style="background:#8b4a5c" onclick="toggleColor(this,'#8b4a5c')"></div>
+          <div class="color-chip" style="background:#c9a84c" onclick="toggleColor(this,'#c9a84c')"></div>
+          <div class="color-chip" style="background:#f5e6c8" onclick="toggleColor(this,'#f5e6c8')"></div>
+          <div class="color-chip" style="background:#2c3e50" onclick="toggleColor(this,'#2c3e50')"></div>
+          <div class="color-chip" style="background:#1abc9c" onclick="toggleColor(this,'#1abc9c')"></div>
+          <div class="color-chip" style="background:#9b59b6" onclick="toggleColor(this,'#9b59b6')"></div>
+          <div class="color-chip" style="background:#e74c3c" onclick="toggleColor(this,'#e74c3c')"></div>
+          <div class="color-chip" style="background:#2980b9" onclick="toggleColor(this,'#2980b9')"></div>
+          <div class="color-chip" style="background:#27ae60" onclick="toggleColor(this,'#27ae60')"></div>
+          <div class="color-chip" style="background:#f5f5f5;border:1px solid #ccc" onclick="toggleColor(this,'#f5f5f5')"></div>
+          <div class="color-chip" style="background:#2a1a20" onclick="toggleColor(this,'#2a1a20')"></div>
+          <div class="color-chip" style="background:linear-gradient(135deg,silver,white)" onclick="toggleColor(this,'chrome')"></div>
+        </div>
+      </div>
+      <div class="field" style="grid-column:1/-1"><label>Notes / Instructions</label><textarea id="ins-notes" placeholder="Apply base coat, then layer coral from free edge..."></textarea></div>
+    </div>
+    <div style="margin-top:1rem;"><button class="btn btn-primary" onclick="saveInspo()">Save to Gallery</button></div>
+  </div>
+  <div class="section-title" style="margin-bottom:1rem;">Saved Designs</div>
+  <div id="inspoGallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;"></div>
+</div>
+
+<!-- REPORTS -->
+<div id="panel-reports" class="panel">
+  <div class="section-hdr"><div class="section-title">Business <span>Reports</span></div></div>
+  <div class="grid-4" style="margin-bottom:1.5rem;">
+    <div class="card"><div class="kpi-lbl">Today</div><div class="kpi-val" id="r-today">$0</div></div>
+    <div class="card"><div class="kpi-lbl">This Week</div><div class="kpi-val" id="r-week">$0</div></div>
+    <div class="card"><div class="kpi-lbl">Est. Month</div><div class="kpi-val" id="r-month">$0</div></div>
+    <div class="card"><div class="kpi-lbl">Total Clients</div><div class="kpi-val" id="r-clients">0</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:1.5rem;">
+    <div class="card"><div class="card-hdr"><span class="card-title">Revenue by Service</span></div><div id="rptSvcRev"></div></div>
+    <div class="card"><div class="card-hdr"><span class="card-title">Technician Earnings</span></div><div id="rptTechEarnings"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="card-title">All Transactions</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Client</th><th>Service</th><th>Technician</th><th>Amount</th><th>Tip</th><th>Method</th></tr></thead>
+    <tbody id="txTable"><tr><td colspan="7" style="text-align:center;color:var(--smoke);padding:1.5rem;font-style:italic;">No transactions yet.</td></tr></tbody></table></div>
+  </div>
+</div>
+
+
+<!-- STAFF PANEL -->
+<div id="panel-staff" class="panel">
+  <div class="section-hdr">
+    <div class="section-title">Staff <span>Logins</span></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Add Staff Member</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Full Name</label><input id="st-name" placeholder="Lisa Nguyen"></div>
+        <div class="field"><label>Email</label><input id="st-email" type="email" placeholder="lisa@nailglow.com"></div>
+        <div class="field"><label>Password</label><input id="st-pass" type="password" placeholder="Set password"></div>
+        <div class="field"><label>Role</label>
+          <select id="st-role">
+            <option value="owner">Owner</option>
+            <option value="manager">Manager</option>
+            <option value="tech">Technician</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:1rem"><button class="btn btn-primary" onclick="addStaff()">Add Staff Member</button></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Current Staff</span></div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Password</th><th></th></tr></thead>
+        <tbody id="staffTable"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SETTINGS PANEL -->
+<div id="panel-settings" class="panel">
+  <div class="section-hdr"><div class="section-title">Studio <span>Settings</span></div></div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Studio Info</span></div>
+      <div class="form-grid">
+        <div class="field" style="grid-column:1/-1"><label>Studio Name</label><input id="set-shopName" placeholder="NailGlow Studio"></div>
+        <div class="field"><label>Phone</label><input id="set-phone" placeholder="(504) 555-2000"></div>
+        <div class="field"><label>Address</label><input id="set-address" placeholder="456 Beauty Blvd"></div>
+        <div class="field"><label>Open Time</label><input type="time" id="set-openTime"></div>
+        <div class="field"><label>Close Time</label><input type="time" id="set-closeTime"></div>
+        <div class="field"><label>Instagram</label><input id="set-instagram" placeholder="@nailglowstudio"></div>
+        <div class="field"><label>Tax Rate (%)</label><input type="number" id="set-taxRate" placeholder="0"></div>
+        <div class="field"><label>Cancellation Policy</label>
+          <select id="set-cancelPolicy"><option>No fee</option><option>24hr notice required</option><option>48hr notice required</option><option>$25 no-show fee</option></select>
+        </div>
+      </div>
+      <div style="margin-top:1rem"><button class="btn btn-primary" onclick="saveSettings()">Save Settings</button></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">💳 Stripe Integration</span></div>
+      <div class="form-grid">
+        <div class="field" style="grid-column:1/-1"><label>Stripe Publishable Key</label><input id="set-stripeKey" placeholder="pk_live_..."></div>
+      </div>
+      <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--smoke)">Get your key at dashboard.stripe.com</div>
+      <div class="card-hdr" style="margin-top:1.25rem"><span class="card-title">📱 Twilio SMS</span></div>
+      <div class="form-grid">
+        <div class="field"><label>Account SID</label><input id="set-twilioSid" placeholder="ACxxxxxxxx"></div>
+        <div class="field"><label>Auth Token</label><input id="set-twilioToken" type="password" placeholder="••••••••"></div>
+        <div class="field" style="grid-column:1/-1"><label>From Phone</label><input id="set-twilioPhone" placeholder="+15041234567"></div>
+      </div>
+      <div class="card-hdr" style="margin-top:1.25rem"><span class="card-title">📧 Email</span></div>
+      <div class="form-grid">
+        <div class="field" style="grid-column:1/-1"><label>From Email</label><input id="set-emailFrom" placeholder="hello@nailglow.com"></div>
+      </div>
+      <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--smoke)">Email opens your mail client. For automated emails, connect SendGrid or Mailgun to your backend.</div>
+      <div style="margin-top:1rem"><button class="btn btn-primary" onclick="saveSettings()">Save All Settings</button></div>
+    </div>
+  </div>
+</div>
+
+
+</div><!-- /container -->
+
+<script>
+// ══════════════════════════════════════════════════
+// NAILGLOW STUDIO — FULL PRODUCTION JS
+// Features: localStorage, login, multi-staff,
+//           Stripe, SMS, email, PDF, recurring appts
+// ══════════════════════════════════════════════════
+
+// ── CONSTANTS ────────────────────────────────────
+const STORE_KEY = 'nailglow_v1';
+const ROLES = { owner: 'Owner', manager: 'Manager', tech: 'Technician' };
+
+// ── DEFAULT DATA ──────────────────────────────────
+const DEFAULT_DATA = {
+  users: [
+    { id: 1, name: 'Owner', email: 'owner@nailglow.com', password: 'nailglow123', role: 'owner', pin: '1234' }
+  ],
+  appointments: [],
+  clients: [],
+  techs: [],
+  walkin: [],
+  inspo: [],
+  transactions: [],
+  services: [
+    {id:1,name:'Classic Manicure',price:25,dur:45,cat:'Manicure',desc:'Nail shape, cuticle care, regular polish'},
+    {id:2,name:'Gel Manicure',price:45,dur:60,cat:'Gel',desc:'Long-lasting gel polish, 2-3 weeks'},
+    {id:3,name:'Acrylic Full Set',price:55,dur:90,cat:'Acrylic',desc:'Full acrylic nail extensions'},
+    {id:4,name:'Acrylic Fill',price:35,dur:60,cat:'Acrylic',desc:'2-3 week fill/maintenance'},
+    {id:5,name:'Classic Pedicure',price:35,dur:50,cat:'Pedicure',desc:'Soak, exfoliate, massage, regular polish'},
+    {id:6,name:'Gel Pedicure',price:55,dur:65,cat:'Pedicure',desc:'Gel polish pedicure'},
+    {id:7,name:'Nail Art (per nail)',price:5,dur:10,cat:'Nail Art',desc:'Custom nail art, per nail'},
+    {id:8,name:'Mani + Pedi Package',price:75,dur:100,cat:'Package',desc:'Classic mani and pedi combo'},
+    {id:9,name:'Chrome/Dip Powder',price:60,dur:75,cat:'Gel',desc:'Dip powder or chrome finish'},
+    {id:10,name:'Nail Removal',price:20,dur:30,cat:'Manicure',desc:'Safe removal of gel or acrylic'},
+  ],
+  products: [
+    {id:1,name:'OPI GelColor — Bubble Bath',cat:'Gel/UV',brand:'OPI',qty:4,low:2,cost:10.99,retail:18},
+    {id:2,name:'Mia Secret Acrylic Liquid',cat:'Acrylic Supplies',brand:'Mia Secret',qty:3,low:1,cost:8.99,retail:0},
+    {id:3,name:'Sanitizing Spray',cat:'Sanitization',brand:'Barbicide',qty:6,low:2,cost:4.99,retail:0},
+    {id:4,name:'Nail Files (pack of 50)',cat:'Tools',brand:'Generic',qty:8,low:3,cost:3.99,retail:0},
+  ],
+  weeklyRev: [0,0,0,0,0,0,0],
+  settings: {
+    shopName: 'NailGlow Studio',
+    phone: '',
+    address: '',
+    openTime: '09:00',
+    closeTime: '19:00',
+    instagram: '',
+    taxRate: 0,
+    stripeKey: '',
+    twilioSid: '',
+    twilioToken: '',
+    twilioPhone: '',
+    emailFrom: '',
+    cancelPolicy: '24hr notice required'
+  }
+};
+
+// ── STATE ─────────────────────────────────────────
+var DB = JSON.parse(JSON.stringify(DEFAULT_DATA));
+var currentUser = null;
+var checkoutId = null;
+var selectedColors = [];
+var pendingRecurring = null;
+
+// ── LOCALSTORAGE ──────────────────────────────────
+function saveDB() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(DB));
+    showToast('💾 Saved', 'success');
+  } catch(e) {
+    showToast('Save failed: ' + e.message, 'error');
+  }
+}
+
+function loadDB() {
+  try {
+    var stored = localStorage.getItem(STORE_KEY);
+    if (stored) {
+      var parsed = JSON.parse(stored);
+      // Merge with defaults to handle new keys
+      DB.users        = parsed.users        || DEFAULT_DATA.users;
+      DB.appointments = parsed.appointments || [];
+      DB.clients      = parsed.clients      || [];
+      DB.techs        = parsed.techs        || [];
+      DB.walkin       = parsed.walkin       || [];
+      DB.inspo        = parsed.inspo        || [];
+      DB.transactions = parsed.transactions || [];
+      DB.services     = parsed.services     || DEFAULT_DATA.services;
+      DB.products     = parsed.products     || DEFAULT_DATA.products;
+      DB.weeklyRev    = parsed.weeklyRev    || [0,0,0,0,0,0,0];
+      DB.settings     = Object.assign({}, DEFAULT_DATA.settings, parsed.settings || {});
+    }
+  } catch(e) {
+    console.warn('Failed to load saved data:', e.message);
+  }
+}
+
+// ── TOAST NOTIFICATIONS ───────────────────────────
+function showToast(msg, type) {
+  var el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'toast toast-' + (type || 'info') + ' show';
+  clearTimeout(el._t);
+  el._t = setTimeout(function() { el.className = 'toast'; }, 3000);
+}
+
+// ── LOGIN SYSTEM ──────────────────────────────────
+function showLogin() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.display = 'none';
+}
+
+function hideLogin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+}
+
+function doLogin() {
+  var email = document.getElementById('login-email').value.trim().toLowerCase();
+  var pass  = document.getElementById('login-pass').value;
+  var user  = DB.users.find(function(u) {
+    return u.email.toLowerCase() === email && u.password === pass;
+  });
+  if (!user) {
+    document.getElementById('login-err').textContent = 'Invalid email or password.';
+    return;
+  }
+  currentUser = user;
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('current-user-name').textContent = user.name;
+  document.getElementById('current-user-role').textContent = ROLES[user.role] || user.role;
+  hideLogin();
+  applyRolePermissions();
+  updateDashboard();
+  populateServiceSelects();
+  renderServices();
+  renderProducts();
+  renderInspo();
+}
+
+function doLogout() {
+  currentUser = null;
+  showLogin();
+}
+
+function applyRolePermissions() {
+  // Hide certain nav items for non-owners
+  var isOwner = currentUser && (currentUser.role === 'owner' || currentUser.role === 'manager');
+  var reportNav = document.querySelector('[data-panel="reports"]');
+  var staffNav  = document.querySelector('[data-panel="staff"]');
+  if (reportNav) reportNav.style.display = isOwner ? '' : 'none';
+  if (staffNav)  staffNav.style.display  = isOwner ? '' : 'none';
+}
+
+// ── HELPERS ───────────────────────────────────────
+var $ = function(id) { return document.getElementById(id); };
+function fmt(n) { return '$' + parseFloat(n || 0).toFixed(2); }
+function today() { return new Date().toISOString().split('T')[0]; }
+function timeNow() { return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+
+// ── PANEL NAV ─────────────────────────────────────
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
+  var panel = $('panel-' + id);
+  if (panel) panel.classList.add('active');
+  if (btn) btn.classList.add('active');
+  updateDashboard();
+  if (id === 'appointments') renderAppts();
+  if (id === 'clients')      renderClients('');
+  if (id === 'technicians')  renderTechs();
+  if (id === 'services')     renderServices();
+  if (id === 'products')     renderProducts();
+  if (id === 'reports')      renderReports();
+  if (id === 'nailinspo')    renderInspo();
+  if (id === 'staff')        renderStaff();
+  if (id === 'settings')     loadSettingsForm();
+}
+
+// ── MODALS ────────────────────────────────────────
+function openModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.add('open');
+  populateTechSelects();
+  populateServiceSelects();
+}
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('open');
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.modal-bg').forEach(function(m) {
+    m.addEventListener('click', function(e) {
+      if (e.target === m) m.classList.remove('open');
+    });
+  });
+});
+
+// ── POPULATE SELECTS ──────────────────────────────
+function populateTechSelects() {
+  ['a-tech','w-tech','c-tech','fTech'].forEach(function(id) {
+    var s = $(id); if (!s) return;
+    var v = s.value;
+    s.innerHTML = id === 'fTech'
+      ? '<option value="">All</option>'
+      : '<option>' + (id === 'a-tech' ? 'Any Available' : 'Next Available') + '</option>';
+    DB.techs.forEach(function(t) {
+      var o = document.createElement('option');
+      o.value = t.name; o.textContent = t.name;
+      s.appendChild(o);
+    });
+    s.value = v;
+  });
+}
+
+function populateServiceSelects() {
+  ['a-service','w-service'].forEach(function(id) {
+    var s = $(id); if (!s) return;
+    s.innerHTML = DB.services.map(function(sv) {
+      return '<option value="' + sv.price + '">' + sv.name + ' — $' + sv.price + '</option>';
+    }).join('');
+  });
+}
+
+// ── APPOINTMENTS ──────────────────────────────────
+function saveAppt() {
+  var svcEl = $('a-service');
+  var price = parseFloat(svcEl.options[svcEl.selectedIndex].value) || 0;
+  var svcName = svcEl.options[svcEl.selectedIndex].text.split(' — ')[0];
+  var recur = $('a-recur').value;
+  var appt = {
+    id: Date.now(),
+    client:  $('a-client').value || 'Guest',
+    phone:   $('a-phone').value,
+    service: svcName,
+    price:   price,
+    tech:    $('a-tech').value,
+    date:    $('a-date').value || today(),
+    time:    $('a-time').value,
+    color:   $('a-color').value,
+    notes:   $('a-notes').value,
+    recur:   recur,
+    status:  'Scheduled'
+  };
+  DB.appointments.push(appt);
+
+  // Schedule recurring appointments
+  if (recur !== 'none') {
+    scheduleRecurring(appt);
+  }
+
+  saveDB();
+  closeModal('apptModal');
+  updateDashboard();
+  renderAppts();
+
+  // Send SMS reminder
+  if (appt.phone) sendSMSReminder(appt);
+  // Send email confirmation
+  if ($('a-email') && $('a-email').value) sendEmailConfirmation(appt, $('a-email').value);
+
+  ['a-client','a-phone','a-color','a-notes','a-email'].forEach(function(id) {
+    var el = $(id); if (el) el.value = '';
+  });
+}
+
+function scheduleRecurring(appt) {
+  var intervals = { weekly: 7, biweekly: 14, monthly: 30 };
+  var days = intervals[appt.recur];
+  if (!days) return;
+  for (var i = 1; i <= 4; i++) {
+    var d = new Date(appt.date);
+    d.setDate(d.getDate() + days * i);
+    var future = JSON.parse(JSON.stringify(appt));
+    future.id = Date.now() + i;
+    future.date = d.toISOString().split('T')[0];
+    future.recur = 'none';
+    future.isRecurring = true;
+    future.parentId = appt.id;
+    DB.appointments.push(future);
+  }
+  showToast('📅 ' + (i-1) + ' recurring appointments scheduled!', 'success');
+}
+
+function renderAppts() {
+  var df = $('fDate') ? $('fDate').value : null;
+  var tf = $('fTech') ? $('fTech').value : null;
+  var sf = $('fStatus') ? $('fStatus').value : null;
+  var list = DB.appointments.concat(DB.walkin.map(function(w) {
+    return Object.assign({}, w, {type: 'wi'});
+  }));
+  if (df) list = list.filter(function(a) { return a.date === df; });
+  if (tf) list = list.filter(function(a) { return a.tech === tf; });
+  if (sf) list = list.filter(function(a) { return a.status === sf; });
+  list.sort(function(a,b) { return a.time > b.time ? 1 : -1; });
+  var tb = $('apptTable');
+  if (!tb) return;
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--smoke);padding:2rem;font-style:italic;">No appointments found.</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(function(a) {
+    var recurBadge = a.isRecurring ? '<span style="font-size:0.65rem;background:#e8f8f0;color:#1a7a4a;padding:2px 6px;border-radius:10px;margin-left:4px;">🔁 Recurring</span>' : '';
+    return '<tr>'
+      + '<td><b>' + (a.time || 'Walk-In') + '</b></td>'
+      + '<td>' + a.client + (a.phone ? '<div style="font-size:0.7rem;color:var(--smoke)">' + a.phone + '</div>' : '') + recurBadge + '</td>'
+      + '<td>' + a.service + '</td>'
+      + '<td>' + a.tech + '</td>'
+      + '<td style="font-size:0.78rem;color:var(--mauve)">' + (a.color || '—') + '</td>'
+      + '<td>' + fmt(a.price) + '</td>'
+      + '<td><span class="badge ' + (a.status==='Completed'?'badge-green':a.status==='No-Show'?'badge-rose':'badge-gold') + '">' + a.status + '</span></td>'
+      + '<td>' + (a.status==='Scheduled' ? '<button class="btn btn-gold btn-sm" onclick="checkout(' + a.id + ')">Checkout</button>' : '') + '</td>'
+      + '<td><button class="btn btn-danger btn-sm" onclick="cancelAppt(' + a.id + ')">✕</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function cancelAppt(id) {
+  DB.appointments = DB.appointments.filter(function(a) { return a.id !== id; });
+  DB.walkin = DB.walkin.filter(function(a) { return a.id !== id; });
+  saveDB(); renderAppts(); updateDashboard();
+}
+
+// ── CHECKOUT ──────────────────────────────────────
+function checkout(id) {
+  var a = DB.appointments.find(function(x) { return x.id === id; })
+       || DB.walkin.find(function(x) { return x.id === id; });
+  if (!a) return;
+  checkoutId = id;
+  $('checkoutContent').innerHTML =
+    '<div style="background:var(--rose-pale);border-radius:12px;padding:1rem;margin-bottom:1rem;">'
+    + '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">'
+    + '<span style="font-weight:600">' + a.service + '</span>'
+    + '<span style="font-size:1.4rem;font-weight:700;color:var(--rose)">' + fmt(a.price) + '</span>'
+    + '</div>'
+    + '<div style="font-size:0.8rem;color:var(--smoke)">Client: ' + a.client + ' · Tech: ' + a.tech + '</div>'
+    + (a.color ? '<div style="font-size:0.78rem;color:var(--mauve);margin-top:4px">💅 ' + a.color + '</div>' : '')
+    + '</div>'
+    + '<div class="field"><label>Tip ($)</label><input id="co-tip" type="number" placeholder="0" value="0"></div>'
+    + '<div class="field" style="margin-top:0.75rem"><label>Payment Method</label>'
+    + '<select id="co-method"><option>Cash</option><option>Card (Stripe)</option><option>Venmo</option><option>Zelle</option><option>Cash App</option></select></div>'
+    + '<div class="field" style="margin-top:0.75rem"><label>Client Email (for receipt)</label>'
+    + '<input id="co-email" type="email" placeholder="client@email.com"></div>';
+  openModal('checkoutModal');
+}
+
+function completeCheckout() {
+  var a = DB.appointments.find(function(x) { return x.id === checkoutId; })
+       || DB.walkin.find(function(x) { return x.id === checkoutId; });
+  if (!a) return;
+  var tip    = parseFloat($('co-tip').value) || 0;
+  var method = $('co-method').value;
+  var email  = $('co-email').value;
+  a.status = 'Completed';
+  a.tip = tip;
+
+  var tx = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString(),
+    client: a.client,
+    service: a.service,
+    tech: a.tech,
+    amount: a.price + tip,
+    tip: tip,
+    method: method,
+    email: email
+  };
+  DB.transactions.push(tx);
+  DB.weeklyRev[new Date().getDay()] += a.price + tip;
+
+  // Update technician stats
+  var tech = DB.techs.find(function(t) { return t.name === a.tech; });
+  if (tech) {
+    tech.services++;
+    tech.earned = Math.round((tech.earned + a.price * (parseFloat(tech.comm) / 100)) * 100) / 100;
+  }
+  // Update client stats
+  var client = DB.clients.find(function(cl) { return cl.name === a.client; });
+  if (client) {
+    client.visits++;
+    client.spent = Math.round((client.spent + a.price + tip) * 100) / 100;
+    client.lastVisit = new Date().toLocaleDateString();
+  }
+
+  saveDB();
+
+  // Send receipt email if provided
+  if (email) sendReceiptEmail(tx, email);
+
+  // Check for rebooking reminder
+  if (client) scheduleRebookingReminder(client, a);
+
+  closeModal('checkoutModal');
+  renderAppts();
+  updateDashboard();
+  renderReports();
+  showToast('✅ Checkout complete! ' + fmt(a.price + tip) + ' received.', 'success');
+}
+
+// ── WALK-IN ───────────────────────────────────────
+function addWalkin() {
+  var sEl = $('w-service');
+  var price = parseFloat(sEl.options[sEl.selectedIndex].value) || 0;
+  var sName = sEl.options[sEl.selectedIndex].text.split(' — ')[0];
+  var wi = {
+    id: Date.now(),
+    client:  $('w-name').value || 'Guest',
+    phone:   $('w-phone').value,
+    service: sName,
+    price:   price,
+    tech:    $('w-tech').value,
+    date:    today(),
+    time:    'Walk-In',
+    status:  'Scheduled',
+    queued:  timeNow()
+  };
+  DB.walkin.push(wi);
+  saveDB();
+  renderWalkin();
+  updateDashboard();
+  $('w-name').value = '';
+  $('w-phone').value = '';
+  showToast('🚶 Walk-in added to queue!', 'success');
+}
+
+function renderWalkin() {
+  var q = DB.walkin.filter(function(w) { return w.status === 'Scheduled'; });
+  var qc = $('qCount'); if (qc) qc.textContent = q.length;
+  var hq = $('hdr-queue'); if (hq) hq.textContent = q.length;
+  var el = $('walkinQueue'); if (!el) return;
+  if (!q.length) {
+    el.innerHTML = '<div style="color:var(--smoke);font-style:italic;font-size:0.85rem;padding:1rem 0;text-align:center;">Queue is empty. ✨</div>';
+    return;
+  }
+  el.innerHTML = q.map(function(w, i) {
+    return '<div style="display:flex;align-items:center;gap:0.75rem;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;background:var(--rose-pale);">'
+      + '<div style="font-size:1.5rem;font-weight:700;color:var(--rose);min-width:24px;">' + (i+1) + '</div>'
+      + '<div style="flex:1"><div style="font-weight:600">' + w.client + '</div>'
+      + '<div style="font-size:0.73rem;color:var(--smoke)">' + w.service + ' · ' + w.tech + ' · In at ' + w.queued + '</div></div>'
+      + '<div style="font-weight:700;color:var(--mauve)">' + fmt(w.price) + '</div>'
+      + '<button class="btn btn-gold btn-sm" onclick="checkout(' + w.id + ')">Checkout</button>'
+      + '</div>';
+  }).join('');
+}
+
+// ── CLIENTS ───────────────────────────────────────
+function saveClient() {
+  DB.clients.push({
+    id: Date.now(),
+    name:    $('c-name').value,
+    phone:   $('c-phone').value,
+    email:   $('c-email').value,
+    bday:    $('c-bday').value,
+    tech:    $('c-tech').value,
+    allergy: $('c-allergy').value,
+    prefs:   $('c-prefs').value,
+    visits:  0,
+    spent:   0,
+    lastVisit: '—'
+  });
+  saveDB();
+  closeModal('clientModal');
+  renderClients('');
+  showToast('👤 Client added!', 'success');
+  ['c-name','c-phone','c-email','c-allergy','c-prefs'].forEach(function(id) {
+    var el = $(id); if (el) el.value = '';
+  });
+}
+
+function renderClients(s) {
+  var list = s
+    ? DB.clients.filter(function(c) { return c.name.toLowerCase().includes(s.toLowerCase()) || (c.phone && c.phone.includes(s)); })
+    : DB.clients;
+  var tb = $('clientTable'); if (!tb) return;
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--smoke);padding:2rem;font-style:italic;">No clients yet.</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(function(c) {
+    return '<tr>'
+      + '<td><b>' + c.name + '</b>' + (c.bday ? '<div style="font-size:0.68rem;color:var(--rose)">🎂 ' + c.bday + '</div>' : '') + '</td>'
+      + '<td>' + (c.phone || '—') + '</td>'
+      + '<td>' + (c.tech || '—') + '</td>'
+      + '<td><span class="badge badge-blue">' + c.visits + '</span></td>'
+      + '<td><b>' + fmt(c.spent) + '</b></td>'
+      + '<td>' + c.lastVisit + '</td>'
+      + '<td style="font-size:0.73rem;color:var(--rose)">' + (c.allergy || '—') + '</td>'
+      + '<td style="font-size:0.73rem;color:var(--smoke);max-width:150px">' + (c.prefs || '—') + '</td>'
+      + '<td><button class="btn btn-danger btn-sm" onclick="deleteClient(' + c.id + ')">✕</button></td>'
+      + '</tr>';
+  }).join('');
+}
+function deleteClient(id) {
+  DB.clients = DB.clients.filter(function(c) { return c.id !== id; });
+  saveDB(); renderClients('');
+}
+
+// ── TECHNICIANS ───────────────────────────────────
+function saveTech() {
+  DB.techs.push({
+    id:       Date.now(),
+    name:     $('t-name').value,
+    phone:    $('t-phone').value,
+    spec:     $('t-spec').value,
+    comm:     $('t-comm').value,
+    lic:      $('t-lic').value,
+    services: 0,
+    earned:   0
+  });
+  saveDB();
+  closeModal('techModal');
+  renderTechs();
+  populateTechSelects();
+  ['t-name','t-phone','t-spec','t-lic'].forEach(function(id) { var el=$(id); if(el) el.value=''; });
+  showToast('💅 Technician added!', 'success');
+}
+
+function renderTechs() {
+  var c = $('techCards'); if (!c) return;
+  if (!DB.techs.length) {
+    c.innerHTML = '<div style="color:var(--smoke);font-style:italic;">No technicians added yet.</div>';
+    return;
+  }
+  c.innerHTML = DB.techs.map(function(t) {
+    return '<div class="tech-card">'
+      + '<div class="tech-avatar">' + t.name[0] + '</div>'
+      + '<div class="tech-name">' + t.name + '</div>'
+      + '<div class="tech-spec">💅 ' + (t.spec || 'All Services') + '</div>'
+      + '<div style="font-size:0.72rem;color:var(--smoke);margin-top:4px">' + (t.phone || '') + (t.lic ? ' · Lic: ' + t.lic : '') + '</div>'
+      + '<div class="tech-stats">'
+      + '<div><div class="tech-stat-val">' + t.services + '</div><div class="tech-stat-lbl">Services</div></div>'
+      + '<div><div class="tech-stat-val">' + fmt(t.earned) + '</div><div class="tech-stat-lbl">Earned</div></div>'
+      + '<div><div class="tech-stat-val">' + t.comm + '%</div><div class="tech-stat-lbl">Commission</div></div>'
+      + '</div>'
+      + '<button class="btn btn-danger btn-sm" style="width:100%;margin-top:1rem" onclick="deleteTech(' + t.id + ')">Remove</button>'
+      + '</div>';
+  }).join('');
+}
+function deleteTech(id) {
+  DB.techs = DB.techs.filter(function(t) { return t.id !== id; });
+  saveDB(); renderTechs();
+}
+
+// ── SERVICES ──────────────────────────────────────
+function addService() {
+  var name = $('s-name').value; if (!name) return;
+  DB.services.push({
+    id: Date.now(), name: name,
+    price: parseFloat($('s-price').value) || 0,
+    dur:   parseInt($('s-dur').value) || 60,
+    cat:   $('s-cat').value,
+    desc:  $('s-desc').value
+  });
+  saveDB(); renderServices(); populateServiceSelects();
+  ['s-name','s-price','s-dur','s-desc'].forEach(function(id) { var el=$(id); if(el) el.value=''; });
+}
+
+function renderServices() {
+  var el = $('serviceMenu'); if (!el) return;
+  var icons = {Manicure:'💅',Pedicure:'🦶',Acrylic:'💎',Gel:'✨','Nail Art':'🎨',Package:'🌟',Waxing:'🌹'};
+  el.innerHTML = DB.services.map(function(s) {
+    return '<div class="svc-card">'
+      + '<div class="svc-icon">' + (icons[s.cat] || '💅') + '</div>'
+      + '<div><div class="svc-name">' + s.name + '</div><div class="svc-desc">' + s.cat + ' · ' + s.dur + ' min' + (s.desc ? ' · ' + s.desc : '') + '</div></div>'
+      + '<div class="svc-price">' + fmt(s.price) + '</div>'
+      + '<button class="btn btn-danger btn-sm" onclick="deleteSvc(' + s.id + ')">✕</button>'
+      + '</div>';
+  }).join('');
+}
+function deleteSvc(id) {
+  DB.services = DB.services.filter(function(s) { return s.id !== id; });
+  saveDB(); renderServices();
+}
+
+// ── PRODUCTS ──────────────────────────────────────
+function addProduct() {
+  DB.products.push({
+    id: Date.now(),
+    name:   $('p-name').value,
+    cat:    $('p-cat').value,
+    brand:  $('p-brand').value,
+    qty:    parseInt($('p-qty').value) || 0,
+    low:    parseInt($('p-low').value) || 2,
+    cost:   parseFloat($('p-cost').value) || 0,
+    retail: parseFloat($('p-retail').value) || 0
+  });
+  saveDB(); renderProducts();
+  ['p-name','p-brand','p-qty','p-low','p-cost','p-retail'].forEach(function(id) { var el=$(id); if(el) el.value=''; });
+}
+
+function renderProducts() {
+  var el = $('productList'); if (!el) return;
+  el.innerHTML = DB.products.map(function(p) {
+    var low = p.qty <= p.low;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">'
+      + '<div style="flex:1"><div style="font-weight:600;font-size:0.875rem">' + p.name + '</div><div style="font-size:0.7rem;color:var(--smoke)">' + (p.brand || p.cat) + '</div></div>'
+      + '<input style="width:55px;background:' + (low ? 'var(--rose-light)' : 'var(--rose-pale)') + ';border:1px solid ' + (low ? 'var(--rose)' : 'var(--border)') + ';border-radius:8px;padding:4px 6px;font-size:0.8rem;text-align:center;" type="number" value="' + p.qty + '" onchange="updateQty(' + p.id + ',this.value)">'
+      + (low ? '<span class="badge badge-rose">Low</span>' : '<span class="badge badge-green">OK</span>')
+      + '<button class="btn btn-danger btn-sm" onclick="deleteProd(' + p.id + ')">✕</button>'
+      + '</div>';
+  }).join('');
+}
+function updateQty(id, v) {
+  var p = DB.products.find(function(x) { return x.id === id; });
+  if (p) p.qty = parseInt(v) || 0;
+  saveDB(); renderProducts();
+}
+function deleteProd(id) {
+  DB.products = DB.products.filter(function(p) { return p.id !== id; });
+  saveDB(); renderProducts();
+}
+
+// ── NAIL INSPO ────────────────────────────────────
+function toggleColor(el, color) {
+  el.classList.toggle('selected');
+  var idx = selectedColors.indexOf(color);
+  if (idx > -1) selectedColors.splice(idx, 1);
+  else selectedColors.push(color);
+}
+
+function saveInspo() {
+  var chips = Array.from(document.querySelectorAll('.color-chip.selected')).map(function(el) {
+    return el.style.background || '#e91e8c';
+  });
+  DB.inspo.push({
+    id:    Date.now(),
+    name:  $('ins-name').value || 'Untitled',
+    style: $('ins-style').value,
+    shape: $('ins-shape').value,
+    diff:  $('ins-diff').value,
+    colors: chips,
+    notes: $('ins-notes').value
+  });
+  document.querySelectorAll('.color-chip').forEach(function(chip) { chip.classList.remove('selected'); });
+  selectedColors.length = 0;
+  $('ins-name').value = ''; $('ins-notes').value = '';
+  saveDB(); renderInspo();
+}
+
+function renderInspo() {
+  var g = $('inspoGallery'); if (!g) return;
+  if (!DB.inspo.length) {
+    g.innerHTML = '<div style="color:var(--smoke);font-style:italic;font-size:0.85rem;grid-column:1/-1;text-align:center;padding:2rem;">No designs saved yet.</div>';
+    return;
+  }
+  g.innerHTML = DB.inspo.map(function(d) {
+    var swatches = d.colors.map(function(c) {
+      return '<div style="width:22px;height:22px;border-radius:50%;background:' + c + ';border:2px solid var(--border);"></div>';
+    }).join('');
+    var diffColor = d.diff === 'Easy' ? '#ff69b4' : d.diff === 'Medium' ? '#e91e8c' : '#800050';
+    return '<div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.25rem;box-shadow:0 2px 12px var(--shadow);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">'
+      + '<div style="display:flex;gap:4px;margin-bottom:0.75rem;">' + swatches + '</div>'
+      + '<div style="font-weight:700;font-size:0.95rem;margin-bottom:3px">' + d.name + '</div>'
+      + '<div style="font-size:0.75rem;color:var(--smoke);margin-bottom:6px">' + d.style + ' · ' + d.shape + ' · <span style="color:' + diffColor + '">' + d.diff + '</span></div>'
+      + (d.notes ? '<div style="font-size:0.75rem;color:var(--smoke);border-top:1px solid var(--border);padding-top:6px;margin-top:6px">' + d.notes + '</div>' : '')
+      + '<button class="btn btn-danger btn-sm" style="width:100%;margin-top:0.75rem" onclick="deleteInspo(' + d.id + ')">Remove</button>'
+      + '</div>';
+  }).join('');
+}
+function deleteInspo(id) {
+  DB.inspo = DB.inspo.filter(function(i) { return i.id !== id; });
+  saveDB(); renderInspo();
+}
+
+// ── STAFF MANAGEMENT ──────────────────────────────
+function renderStaff() {
+  var el = $('staffTable'); if (!el) return;
+  el.innerHTML = DB.users.map(function(u) {
+    return '<tr>'
+      + '<td><b>' + u.name + '</b></td>'
+      + '<td>' + u.email + '</td>'
+      + '<td><span class="badge badge-blue">' + (ROLES[u.role] || u.role) + '</span></td>'
+      + '<td>••••••</td>'
+      + '<td>' + (u.id !== 1 ? '<button class="btn btn-danger btn-sm" onclick="deleteStaff(' + u.id + ')">Remove</button>' : '<span style="color:var(--smoke);font-size:0.75rem">Owner</span>') + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function addStaff() {
+  var name  = $('st-name').value;
+  var email = $('st-email').value;
+  var pass  = $('st-pass').value;
+  var role  = $('st-role').value;
+  if (!name || !email || !pass) { showToast('All fields required', 'error'); return; }
+  if (DB.users.find(function(u) { return u.email === email; })) {
+    showToast('Email already exists', 'error'); return;
+  }
+  DB.users.push({ id: Date.now(), name: name, email: email, password: pass, role: role });
+  saveDB(); renderStaff();
+  ['st-name','st-email','st-pass'].forEach(function(id) { var el=$(id); if(el) el.value=''; });
+  showToast('👥 Staff member added!', 'success');
+}
+function deleteStaff(id) {
+  DB.users = DB.users.filter(function(u) { return u.id !== id; });
+  saveDB(); renderStaff();
+}
+
+// ── REPORTS & PDF EXPORT ──────────────────────────
+function renderReports() {
+  var todayRev = DB.transactions.reduce(function(s,t) { return s + t.amount; }, 0);
+  var weekRev  = DB.weeklyRev.reduce(function(a,b) { return a + b; }, 0);
+  var el;
+  el = $('r-today');   if (el) el.textContent = fmt(todayRev);
+  el = $('r-week');    if (el) el.textContent = fmt(weekRev);
+  el = $('r-month');   if (el) el.textContent = fmt(weekRev * 4);
+  el = $('r-clients'); if (el) el.textContent = DB.clients.length;
+
+  var svcRev = {};
+  DB.transactions.forEach(function(t) { svcRev[t.service] = (svcRev[t.service] || 0) + t.amount; });
+  var maxSvc = Math.max.apply(null, Object.values(svcRev).concat([1]));
+  el = $('rptSvcRev');
+  if (el) el.innerHTML = Object.keys(svcRev).length
+    ? Object.keys(svcRev).sort(function(a,b){return svcRev[b]-svcRev[a];}).map(function(s) {
+        return '<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:3px;"><span>' + s + '</span><b>' + fmt(svcRev[s]) + '</b></div><div class="prog-wrap"><div class="prog-bar" style="width:' + (svcRev[s]/maxSvc*100) + '%"></div></div></div>';
+      }).join('')
+    : '<div style="color:var(--smoke);font-style:italic;font-size:0.82rem;">No data yet.</div>';
+
+  el = $('rptTechEarnings');
+  if (el) el.innerHTML = DB.techs.length
+    ? DB.techs.map(function(t) {
+        var maxE = Math.max.apply(null, DB.techs.map(function(x){return x.earned;}).concat([1]));
+        return '<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:3px;"><span>' + t.name + '</span><b>' + fmt(t.earned) + '</b></div><div class="prog-wrap"><div class="prog-bar" style="width:' + (t.earned/maxE*100) + '%"></div></div></div>';
+      }).join('')
+    : '<div style="color:var(--smoke);font-style:italic;font-size:0.82rem;">No technicians.</div>';
+
+  el = $('txTable');
+  if (el) el.innerHTML = DB.transactions.length
+    ? DB.transactions.slice().reverse().map(function(t) {
+        return '<tr><td>' + t.date + '</td><td>' + t.client + '</td><td>' + t.service + '</td><td>' + t.tech + '</td><td><b>' + fmt(t.amount) + '</b></td><td>' + (t.tip > 0 ? '<span style="color:#1a7a4a">+' + fmt(t.tip) + '</span>' : '—') + '</td><td><span class="badge badge-blue">' + t.method + '</span></td></tr>';
+      }).join('')
+    : '<tr><td colspan="7" style="text-align:center;color:var(--smoke);padding:1.5rem;font-style:italic;">No transactions yet.</td></tr>';
+}
+
+function exportPDF() {
+  var weekRev = DB.weeklyRev.reduce(function(a,b){return a+b;},0);
+  var todayRev = DB.transactions.reduce(function(s,t){return s+t.amount;},0);
+  var txRows = DB.transactions.slice().reverse().map(function(t) {
+    return '<tr><td>' + t.date + '</td><td>' + t.client + '</td><td>' + t.service + '</td><td>' + t.tech + '</td><td>' + fmt(t.amount) + '</td><td>' + t.method + '</td></tr>';
+  }).join('');
+  var html = '<!DOCTYPE html><html><head><title>NailGlow Report</title>'
+    + '<style>body{font-family:Arial,sans-serif;padding:2rem;color:#2a0018;}h1{color:#e91e8c;}table{width:100%;border-collapse:collapse;margin-top:1rem;}th{background:#e91e8c;color:white;padding:8px;}td{padding:7px;border-bottom:1px solid #ffb3d9;}.stat{display:inline-block;margin-right:2rem;margin-bottom:1rem;}.stat-val{font-size:1.8rem;font-weight:bold;color:#e91e8c;}.stat-lbl{font-size:0.75rem;color:#b06080;text-transform:uppercase;}</style>'
+    + '</head><body>'
+    + '<h1>💎 NailGlow Studio — Business Report</h1>'
+    + '<p style="color:#b06080">Generated: ' + new Date().toLocaleString() + ' · Owner: ' + (currentUser ? currentUser.name : '') + '</p>'
+    + '<div style="margin:1.5rem 0">'
+    + '<div class="stat"><div class="stat-val">' + fmt(todayRev) + '</div><div class="stat-lbl">Today</div></div>'
+    + '<div class="stat"><div class="stat-val">' + fmt(weekRev) + '</div><div class="stat-lbl">This Week</div></div>'
+    + '<div class="stat"><div class="stat-val">' + fmt(weekRev*4) + '</div><div class="stat-lbl">Est. Month</div></div>'
+    + '<div class="stat"><div class="stat-val">' + DB.clients.length + '</div><div class="stat-lbl">Clients</div></div>'
+    + '</div>'
+    + '<h2>Transactions</h2><table><thead><tr><th>Date</th><th>Client</th><th>Service</th><th>Tech</th><th>Amount</th><th>Method</th></tr></thead><tbody>' + txRows + '</tbody></table>'
+    + '</body></html>';
+  var win = window.open('', '_blank');
+  if (win) {
+    win.document.write(html);
+    win.document.close();
+    win.print();
+  } else {
+    showToast('Allow popups to export PDF', 'error');
+  }
+}
+
+// ── SMS REMINDERS (Twilio) ────────────────────────
+function sendSMSReminder(appt) {
+  if (!DB.settings.twilioSid || !DB.settings.twilioToken || !DB.settings.twilioPhone) {
+    showToast('⚠️ Twilio not configured — SMS skipped', 'info');
+    return;
+  }
+  var msg = 'Hi ' + appt.client + '! Reminder: ' + appt.service + ' on ' + appt.date + ' at ' + appt.time + '. — ' + DB.settings.shopName + '. Reply STOP to unsubscribe.';
+  // In production: POST to your backend which calls Twilio API
+  // For demo: show the message that would be sent
+  showToast('📱 SMS queued: ' + msg.substring(0, 60) + '...', 'info');
+  console.log('SMS to', appt.phone, ':', msg);
+}
+
+// ── EMAIL (mailto / EmailJS) ──────────────────────
+function sendEmailConfirmation(appt, email) {
+  var subject = encodeURIComponent('Appointment Confirmed — ' + DB.settings.shopName);
+  var body = encodeURIComponent(
+    'Hi ' + appt.client + ',
+
+'
+    + 'Your appointment is confirmed!
+
+'
+    + 'Service: ' + appt.service + '
+'
+    + 'Date: ' + appt.date + '
+'
+    + 'Time: ' + appt.time + '
+'
+    + 'Technician: ' + appt.tech + '
+'
+    + 'Price: ' + fmt(appt.price) + '
+
+'
+    + 'See you soon!
+' + DB.settings.shopName
+  );
+  window.open('mailto:' + email + '?subject=' + subject + '&body=' + body);
+}
+
+function sendReceiptEmail(tx, email) {
+  var subject = encodeURIComponent('Receipt — ' + DB.settings.shopName);
+  var body = encodeURIComponent(
+    'Thank you ' + tx.client + '!
+
+'
+    + 'Service: ' + tx.service + '
+'
+    + 'Amount: ' + fmt(tx.amount) + (tx.tip > 0 ? ' (incl. ' + fmt(tx.tip) + ' tip)' : '') + '
+'
+    + 'Technician: ' + tx.tech + '
+'
+    + 'Date: ' + tx.date + '
+'
+    + 'Payment: ' + tx.method + '
+
+'
+    + 'Thank you for visiting ' + DB.settings.shopName + '!'
+  );
+  window.open('mailto:' + email + '?subject=' + subject + '&body=' + body);
+}
+
+function scheduleRebookingReminder(client, appt) {
+  // Store a rebooking flag — in production this triggers a timed SMS/email
+  var reminder = {
+    clientName: client.name,
+    phone: client.phone,
+    service: appt.service,
+    dueDate: new Date(new Date().getTime() + 14*24*60*60*1000).toLocaleDateString()
+  };
+  showToast('🗓️ Rebooking reminder set for ' + reminder.dueDate, 'info');
+  console.log('Rebooking reminder:', reminder);
+}
+
+// ── STRIPE PAYMENT ────────────────────────────────
+function openStripeCheckout(amount, description) {
+  if (!DB.settings.stripeKey) {
+    showToast('⚠️ Add Stripe key in Settings to take card payments', 'error');
+    return;
+  }
+  // In production: use Stripe.js with your publishable key
+  showToast('💳 Stripe checkout: ' + fmt(amount) + ' for ' + description, 'info');
+  console.log('Stripe charge:', amount, description);
+}
+
+// ── DASHBOARD ─────────────────────────────────────
+function updateDashboard() {
+  var todStr = today();
+  var todAppts = DB.appointments.concat(DB.walkin).filter(function(a) { return a.date === todStr; });
+  var done = todAppts.filter(function(a) { return a.status === 'Completed'; });
+  var rev = done.reduce(function(s,a) { return s + a.price + (a.tip || 0); }, 0);
+  var queue = DB.walkin.filter(function(w) { return w.status === 'Scheduled'; }).length;
+
+  var set = function(id, val) { var el=$(id); if(el) el.textContent = val; };
+  set('hdr-rev',   fmt(rev));
+  set('hdr-appts', todAppts.length);
+  set('hdr-queue', queue);
+  set('d-rev',     fmt(rev));
+  set('d-appts',   todAppts.length);
+  set('d-queue',   queue);
+  set('d-techs',   DB.techs.length);
+  set('d-rev-note', done.length + ' services completed');
+
+  var sched = $('todaySchedule');
+  if (sched) {
+    sched.innerHTML = todAppts.length
+      ? todAppts.sort(function(a,b){return a.time>b.time?1:-1;}).map(function(a) {
+          return '<div class="appt-slot">'
+            + '<div class="slot-time">' + (a.time || 'Walk-In') + '</div>'
+            + '<div><div class="slot-client">' + a.client + '</div><div class="slot-svc">' + a.service + ' · ' + a.tech + (a.color ? ' · 💅 ' + a.color : '') + '</div></div>'
+            + '<span class="badge ' + (a.status==='Completed'?'badge-green':a.status==='No-Show'?'badge-rose':'badge-gold') + '" style="margin-left:auto">' + a.status + '</span>'
+            + '<div class="slot-price">' + fmt(a.price) + '</div>'
+            + '</div>';
+        }).join('')
+      : '<div style="color:var(--smoke);font-style:italic;font-size:0.85rem;padding:1rem 0;text-align:center;">No appointments today. ✨</div>';
+  }
+
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var maxW = Math.max.apply(null, DB.weeklyRev.concat([1]));
+  var weekTotal = DB.weeklyRev.reduce(function(a,b){return a+b;},0);
+  set('weekTotal', fmt(weekTotal));
+  set('monthEst',  fmt(weekTotal * 4));
+  var wc = $('weekChart');
+  if (wc) {
+    wc.innerHTML = DB.weeklyRev.map(function(v,i) {
+      return '<div class="bar-col">'
+        + '<div class="bar-val">$' + v + '</div>'
+        + '<div class="bar" style="height:' + Math.max(v/maxW*100,4) + 'px"></div>'
+        + '<div class="bar-lbl">' + days[i] + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  var svcC = {};
+  DB.appointments.concat(DB.walkin).forEach(function(a) {
+    if (a.status === 'Completed') svcC[a.service] = (svcC[a.service] || 0) + 1;
+  });
+  var ts = $('topSvcs');
+  if (ts) ts.innerHTML = Object.keys(svcC).length
+    ? Object.keys(svcC).sort(function(a,b){return svcC[b]-svcC[a];}).slice(0,5).map(function(s) {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);"><span style="font-size:0.85rem">' + s + '</span><span class="badge badge-blue">' + svcC[s] + 'x</span></div>';
+      }).join('')
+    : '<div style="color:var(--smoke);font-style:italic;font-size:0.82rem;">No data yet.</div>';
+
+  var tp = $('techPerf');
+  if (tp) tp.innerHTML = DB.techs.length
+    ? DB.techs.map(function(t) {
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);"><span style="font-weight:600;font-size:0.85rem">' + t.name + '</span><div style="text-align:right"><div style="font-size:1.1rem;font-weight:700;color:var(--rose)">' + t.services + ' svcs</div><div style="font-size:0.7rem;color:var(--smoke)">' + fmt(t.earned) + '</div></div></div>';
+      }).join('')
+    : '<div style="color:var(--smoke);font-style:italic;font-size:0.82rem;">Add technicians to track.</div>';
+}
+
+// ── SETTINGS ──────────────────────────────────────
+function loadSettingsForm() {
+  var s = DB.settings;
+  var fields = ['shopName','phone','address','openTime','closeTime','instagram','taxRate','stripeKey','twilioSid','twilioToken','twilioPhone','emailFrom'];
+  fields.forEach(function(f) {
+    var el = $('set-' + f); if (el) el.value = s[f] || '';
+  });
+}
+
+function saveSettings() {
+  var fields = ['shopName','phone','address','openTime','closeTime','instagram','taxRate','stripeKey','twilioSid','twilioToken','twilioPhone','emailFrom'];
+  fields.forEach(function(f) {
+    var el = $('set-' + f); if (el) DB.settings[f] = el.value;
+  });
+  saveDB();
+  showToast('✅ Settings saved!', 'success');
+}
+
+// ── INIT ──────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  try {
+    loadDB();
+    showLogin();
+    var dateEl = $('a-date');
+    if (dateEl) dateEl.value = today();
+    populateServiceSelects();
+    renderServices();
+    renderProducts();
+    renderInspo();
+  } catch(e) {
+    console.warn('Init error:', e.message);
+  }
+});
+</script>
 </body>
 </html>

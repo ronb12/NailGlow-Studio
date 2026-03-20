@@ -1,6 +1,8 @@
 # NailGlow Studio
 
-Public marketing / product shell for **NailGlow Studio** — nail salon business management (Bradley Virtual Solutions portfolio).
+Full **NailGlow Studio** shop-management UI in a single `index.html` (synced from your saved file `~/Downloads/NailGlow_Studio.html`). Bradley Virtual Solutions portfolio app.
+
+After you edit the master copy in Downloads, overwrite `index.html` here (or edit this file directly) before committing.
 
 ## GitHub
 

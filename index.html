@@ -181,14 +181,38 @@ td{padding:10px 14px;font-size:0.85rem;}
     </div>
     <div style="display:flex;flex-direction:column;gap:0.75rem;">
       <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#8b1a4a;">Email</label>
-        <input id="login-email" type="email" placeholder="owner@nailglow.com" value="owner@nailglow.com" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
+        <input id="login-email" type="email" placeholder="your-owner@email.com" autocomplete="username" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
       </div>
       <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#8b1a4a;">Password</label>
-        <input id="login-pass" type="password" placeholder="••••••••" value="nailglow123" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
+        <input id="login-pass" type="password" placeholder="Your password" autocomplete="current-password" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
       </div>
       <div id="login-err" style="color:#e91e8c;font-size:0.8rem;min-height:1rem;"></div>
       <button onclick="doLogin()" style="background:#e91e8c;color:white;border:none;border-radius:30px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;">Sign In 💅</button>
-      <div style="text-align:center;font-size:0.75rem;color:#b06080;">Default: owner@nailglow.com / nailglow123</div>
+      <div style="text-align:center;font-size:0.75rem;color:#b06080;">First visit? Create your owner password on the setup screen. No default credentials are in this repository.</div>
+    </div>
+  </div>
+</div>
+
+<!-- First-run owner password (no secrets in source / GitHub) -->
+<div id="setupScreen" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#4a0a2e,#e91e8c);z-index:10000;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:white;border-radius:24px;padding:2.5rem;width:min(400px,92vw);box-shadow:0 24px 60px rgba(128,0,80,0.35);">
+    <div style="text-align:center;margin-bottom:1.25rem;">
+      <div style="font-size:2.5rem">🔐</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:700;color:#2a0018;">Welcome to NailGlow</div>
+      <div style="font-size:0.78rem;color:#8b1a4a;margin-top:0.5rem;">Set your <strong>owner password</strong>. It stays in this browser only (local storage).</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.65rem;">
+      <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;color:#8b1a4a;">Owner email</label>
+        <input id="setup-email" type="email" readonly style="width:100%;background:#fff5f9;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;">
+      </div>
+      <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;color:#8b1a4a;">New password (min 8)</label>
+        <input id="setup-pass" type="password" autocomplete="new-password" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;">
+      </div>
+      <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;color:#8b1a4a;">Confirm password</label>
+        <input id="setup-pass2" type="password" autocomplete="new-password" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;">
+      </div>
+      <div id="setup-err" style="color:#e91e8c;font-size:0.8rem;min-height:1rem;"></div>
+      <button type="button" onclick="completeOwnerPasswordSetup()" style="background:#e91e8c;color:white;border:none;border-radius:30px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;">Save &amp; continue</button>
     </div>
   </div>
 </div>
@@ -616,7 +640,7 @@ const ROLES = { owner: 'Owner', manager: 'Manager', tech: 'Technician' };
 // ── DEFAULT DATA ──────────────────────────────────
 const DEFAULT_DATA = {
   users: [
-    { id: 1, name: 'Owner', email: 'owner@nailglow.com', password: 'nailglow123', role: 'owner', pin: '1234' }
+    { id: 1, name: 'Owner', email: 'owner@example.com', password: null, role: 'owner' }
   ],
   appointments: [],
   clients: [],
@@ -711,9 +735,51 @@ function showToast(msg, type) {
 }
 
 // ── LOGIN SYSTEM ──────────────────────────────────
+function needsOwnerPasswordSetup() {
+  return DB.users.some(function(u) { return u.role === 'owner' && (u.password == null || u.password === ''); });
+}
+
 function showLogin() {
+  var su = document.getElementById('setupScreen');
+  if (su) su.style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('appScreen').style.display = 'none';
+}
+
+function showSetupScreen() {
+  var owner = DB.users.find(function(u) { return u.role === 'owner'; });
+  var em = document.getElementById('setup-email');
+  if (em && owner) em.value = owner.email;
+  var su = document.getElementById('setupScreen');
+  if (su) su.style.display = 'flex';
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'none';
+}
+
+function completeOwnerPasswordSetup() {
+  var p1 = document.getElementById('setup-pass').value;
+  var p2 = document.getElementById('setup-pass2').value;
+  var err = document.getElementById('setup-err');
+  if (err) err.textContent = '';
+  if (p1.length < 8) {
+    if (err) err.textContent = 'Use at least 8 characters.';
+    return;
+  }
+  if (p1 !== p2) {
+    if (err) err.textContent = 'Passwords do not match.';
+    return;
+  }
+  var owner = DB.users.find(function(u) { return u.role === 'owner'; });
+  if (!owner) {
+    if (err) err.textContent = 'No owner account.';
+    return;
+  }
+  owner.password = p1;
+  saveDB();
+  document.getElementById('setup-pass').value = '';
+  document.getElementById('setup-pass2').value = '';
+  showLogin();
+  showToast('Owner password saved. Sign in below.', 'success');
 }
 
 function hideLogin() {
@@ -724,11 +790,11 @@ function hideLogin() {
 function doLogin() {
   var email = document.getElementById('login-email').value.trim().toLowerCase();
   var pass  = document.getElementById('login-pass').value;
-  var user  = DB.users.find(function(u) {
-    return u.email.toLowerCase() === email && u.password === pass;
-  });
-  if (!user) {
-    document.getElementById('login-err').textContent = 'Invalid email or password.';
+  var user  = DB.users.find(function(u) { return u.email.toLowerCase() === email; });
+  if (!user || user.password == null || user.password === '' || user.password !== pass) {
+    document.getElementById('login-err').textContent = (!user || user.password == null || user.password === '')
+      ? 'Invalid credentials or finish owner setup first.'
+      : 'Invalid email or password.';
     return;
   }
   currentUser = user;
@@ -1574,7 +1640,10 @@ function importNailGlowData(ev) {
         var em = currentUser.email;
         currentUser = DB.users.find(function(u) { return u.email.toLowerCase() === String(em).toLowerCase(); }) || null;
       }
-      if (!currentUser) {
+      if (needsOwnerPasswordSetup()) {
+        currentUser = null;
+        showSetupScreen();
+      } else if (!currentUser) {
         showLogin();
       } else {
         if ($('current-user-name')) $('current-user-name').textContent = currentUser.name;
@@ -1607,7 +1676,11 @@ function importNailGlowData(ev) {
 window.addEventListener('DOMContentLoaded', function() {
   try {
     loadDB();
-    showLogin();
+    if (needsOwnerPasswordSetup()) {
+      showSetupScreen();
+    } else {
+      showLogin();
+    }
     var dateEl = $('a-date');
     if (dateEl) dateEl.value = today();
     populateServiceSelects();

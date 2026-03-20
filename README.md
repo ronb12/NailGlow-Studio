@@ -4,6 +4,10 @@ Full **NailGlow Studio** shop-management UI in a single `index.html` (synced fro
 
 After you edit the master copy in Downloads, overwrite `index.html` here (or edit this file directly) before committing.
 
+## First-time login (security)
+
+**No default passwords are committed** to this repo. On first launch you’ll set an **owner password** (saved only in **local storage**). Default owner email in the app seed is `owner@example.com`. Use **Import backup** if you’re restoring a JSON that already has users/passwords.
+
 ## GitHub
 
 Create the repository (if you haven’t):

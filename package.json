@@ -1,0 +1,8 @@
+{
+  "name": "nailglow-studio",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.1"
+  }
+}

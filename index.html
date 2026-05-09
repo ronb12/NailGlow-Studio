@@ -862,6 +862,7 @@ td{padding:10px 14px;font-size:0.85rem;}
 // ── CONSTANTS ────────────────────────────────────
 const STORE_KEY = 'nailglow_v1';
 const CUSTOMER_SESSION_KEY = 'nailglow_customer_session';
+const STATE_API_PATH = '/api/state';
 const ROLES = { owner: 'Owner', manager: 'Manager', tech: 'Technician', customer: 'Customer' };
 
 // ── DEFAULT DATA ──────────────────────────────────
@@ -919,6 +920,8 @@ var portalEditingAppointmentId = null;
 var checkoutId = null;
 var selectedColors = [];
 var pendingRecurring = null;
+var remoteSyncTimer = null;
+var remoteSyncPromise = Promise.resolve();
 
 // ── LOCALSTORAGE ──────────────────────────────────
 function saveDB() {
@@ -928,6 +931,7 @@ function saveDB() {
   } catch(e) {
     showToast('Save failed: ' + e.message, 'error');
   }
+  queueRemoteSync();
 }
 
 function loadDB() {
@@ -951,6 +955,96 @@ function loadDB() {
   } catch(e) {
     console.warn('Failed to load saved data:', e.message);
   }
+}
+
+function canUseRemoteState() {
+  return typeof window !== 'undefined' &&
+    typeof window.fetch === 'function' &&
+    /^https?:$/i.test(window.location.protocol);
+}
+
+function mergeHostedState(source) {
+  DB = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  var parsed = source || {};
+  DB.users        = parsed.users        || DEFAULT_DATA.users;
+  DB.appointments = parsed.appointments || [];
+  DB.clients      = parsed.clients      || [];
+  DB.techs        = parsed.techs        || [];
+  DB.walkin       = parsed.walkin       || [];
+  DB.inspo        = parsed.inspo        || [];
+  DB.transactions = parsed.transactions || [];
+  DB.services     = parsed.services     || DEFAULT_DATA.services;
+  DB.products     = parsed.products     || DEFAULT_DATA.products;
+  DB.weeklyRev    = parsed.weeklyRev    || [0,0,0,0,0,0,0];
+  DB.settings     = Object.assign({}, DEFAULT_DATA.settings, parsed.settings || {});
+}
+
+function applyRuntimeRefresh() {
+  renderLanding();
+  populateServiceSelects();
+  populateTechSelects();
+  renderServices();
+  renderProducts();
+  renderInspo();
+  renderWalkin();
+  updateDashboard();
+  renderAppts();
+  renderClients('');
+  renderTechs();
+  renderReports();
+  renderStaff();
+  loadSettingsForm();
+  renderCustomerPortalProfile();
+}
+
+async function hydrateRemoteState() {
+  if (!canUseRemoteState()) return;
+  try {
+    var res = await fetch(STATE_API_PATH, { headers: { accept: 'application/json' } });
+    if (!res.ok) return;
+    var payload = await res.json();
+    if (payload && payload.ok && payload.state && typeof payload.state === 'object') {
+      mergeHostedState(payload.state);
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(DB));
+      } catch (e) {
+        console.warn('NailGlow hydrate local cache:', e.message);
+      }
+      currentCustomer = restoreCustomerSession();
+      applyRuntimeRefresh();
+      return;
+    }
+    var hasLocalData =
+      DB.appointments.length || DB.clients.length || DB.techs.length || DB.walkin.length || DB.transactions.length || DB.inspo.length;
+    if (hasLocalData) await syncStateToRemote();
+  } catch (e) {
+    console.warn('NailGlow hydrateRemoteState:', e.message);
+  }
+}
+
+async function syncStateToRemote() {
+  if (!canUseRemoteState()) return false;
+  try {
+    var res = await fetch(STATE_API_PATH, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ state: DB })
+    });
+    return res.ok;
+  } catch (e) {
+    console.warn('NailGlow syncStateToRemote:', e.message);
+    return false;
+  }
+}
+
+function queueRemoteSync() {
+  if (!canUseRemoteState()) return;
+  if (remoteSyncTimer) clearTimeout(remoteSyncTimer);
+  remoteSyncTimer = setTimeout(function() {
+    remoteSyncPromise = remoteSyncPromise.then(function() {
+      return syncStateToRemote();
+    });
+  }, 250);
 }
 
 function normalizeEmail(v) {
@@ -2348,6 +2442,7 @@ window.addEventListener('DOMContentLoaded', function() {
     renderInspo();
     renderLanding();
     renderCustomerPortalProfile();
+    hydrateRemoteState();
   } catch(e) {
     console.warn('Init error:', e.message);
   }

@@ -355,8 +355,9 @@ td{padding:10px 14px;font-size:0.85rem;}
             <div class="field" style="grid-column:1/-1"><label>Style Notes</label><textarea id="cp-book-notes" placeholder="Shape, length, inspo, allergies, preferred finish..."></textarea></div>
           </div>
           <div id="cp-booking-err" style="font-size:0.8rem;color:#c0392b;min-height:1rem;margin-top:0.65rem;"></div>
+          <div id="cp-booking-note" style="font-size:0.8rem;color:var(--mauve);min-height:1rem;margin-top:0.15rem;"></div>
           <div class="portal-actions">
-            <button class="btn btn-primary" onclick="saveCustomerPortalBooking()">Book Appointment</button>
+            <button id="cp-book-submit" class="btn btn-primary" onclick="saveCustomerPortalBooking()">Book Appointment</button>
           </div>
         </div>
         <div>
@@ -552,6 +553,7 @@ td{padding:10px 14px;font-size:0.85rem;}
     <button class="nav-btn" onclick="showPanel('products',this)" data-panel="products">🧴 Products</button>
     <button class="nav-btn" onclick="showPanel('nailinspo',this)" data-panel="nailinspo">🎨 Nail Inspo</button>
     <button class="nav-btn" onclick="showPanel('reports',this)" data-panel="reports">📈 Reports</button>
+    <button class="nav-btn" onclick="showPanel('staff',this)" data-panel="staff">👩‍💼 Staff</button>
     <button class="nav-btn" onclick="showPanel('settings',this)" data-panel="settings">⚙️ Settings</button>
   </div>
 </nav>
@@ -913,6 +915,7 @@ const DEFAULT_DATA = {
 var DB = JSON.parse(JSON.stringify(DEFAULT_DATA));
 var currentUser = null;
 var currentCustomer = null;
+var portalEditingAppointmentId = null;
 var checkoutId = null;
 var selectedColors = [];
 var pendingRecurring = null;
@@ -1105,7 +1108,7 @@ function renderCustomerPortalLists() {
   upcoming.innerHTML = upcomingList.length ? upcomingList.map(function(a) {
     return '<div class="portal-appt">'
       + '<div class="portal-appt-top"><div><div class="portal-appt-title">' + a.service + '</div><div class="portal-appt-meta">' + a.date + ' at ' + a.time + '<br>' + (a.tech || 'Any available') + ' · ' + fmt(a.price) + (a.color ? '<br>Design: ' + a.color : '') + '</div></div><span class="badge badge-gold">' + a.status + '</span></div>'
-      + '<div class="portal-actions"><button class="btn btn-outline btn-sm" onclick="rescheduleCustomerAppt(' + a.id + ')">Reschedule</button><button class="btn btn-danger btn-sm" onclick="cancelCustomerAppt(' + a.id + ')">Cancel</button></div>'
+      + '<div class="portal-actions"><button class="btn btn-outline btn-sm" onclick="beginCustomerReschedule(' + a.id + ')">Reschedule</button><button class="btn btn-danger btn-sm" onclick="cancelCustomerAppt(' + a.id + ')">Cancel</button></div>'
       + '</div>';
   }).join('') : '<div class="portal-empty">No upcoming appointments yet. Book one below and it will appear here.</div>';
   history.innerHTML = historyList.length ? historyList.slice().reverse().map(function(a) {
@@ -1145,7 +1148,28 @@ function renderCustomerPortalProfile() {
   }
   var email = $('cp-book-email');
   if (email && currentCustomer.email) email.value = currentCustomer.email;
+  syncPortalBookingMode();
   renderCustomerPortalLists();
+}
+
+function resetCustomerBookingForm() {
+  portalEditingAppointmentId = null;
+  ['cp-book-color', 'cp-book-notes'].forEach(function(id) { if ($(id)) $(id).value = ''; });
+  var dateEl = $('cp-book-date');
+  if (dateEl) dateEl.value = today();
+  var timeEl = $('cp-book-time');
+  if (timeEl) timeEl.value = '9:00 AM';
+  var techEl = $('cp-book-tech');
+  if (techEl) techEl.value = 'Any Available';
+  if ($('cp-book-service') && DB.services.length) $('cp-book-service').value = String(DB.services[0].id);
+  syncPortalBookingMode();
+}
+
+function syncPortalBookingMode() {
+  var submit = $('cp-book-submit');
+  var note = $('cp-booking-note');
+  if (submit) submit.textContent = portalEditingAppointmentId ? 'Save Changes' : 'Book Appointment';
+  if (note) note.textContent = portalEditingAppointmentId ? 'Editing an existing appointment. Save changes when you are done.' : '';
 }
 
 function showCustomerPortal() {
@@ -1211,24 +1235,25 @@ function createCustomerAccount() {
 function customerLogout() {
   currentCustomer = null;
   persistCustomerSession();
+  resetCustomerBookingForm();
   renderCustomerPortalProfile();
   showToast('Signed out.', 'info');
 }
 
-function rescheduleCustomerAppt(id) {
+function beginCustomerReschedule(id) {
   var appt = DB.appointments.find(function(a) { return a.id === id; });
   if (!appt || !currentCustomer) return;
-  var newDate = window.prompt('Enter the new date (YYYY-MM-DD)', appt.date || today());
-  if (!newDate) return;
-  var newTime = window.prompt('Enter the new time', appt.time || '10:00 AM');
-  if (!newTime) return;
-  appt.date = newDate;
-  appt.time = newTime;
-  saveDB();
-  renderAppts();
-  updateDashboard();
-  renderCustomerPortalProfile();
-  showToast('Appointment rescheduled.', 'success');
+  portalEditingAppointmentId = id;
+  var service = DB.services.find(function(s) { return s.name === appt.service; });
+  if ($('cp-book-service') && service) $('cp-book-service').value = String(service.id);
+  if ($('cp-book-tech')) $('cp-book-tech').value = appt.tech || 'Any Available';
+  if ($('cp-book-date')) $('cp-book-date').value = appt.date || today();
+  if ($('cp-book-time')) $('cp-book-time').value = appt.time || '9:00 AM';
+  if ($('cp-book-color')) $('cp-book-color').value = appt.color || '';
+  if ($('cp-book-email')) $('cp-book-email').value = appt.email || currentCustomer.email || '';
+  if ($('cp-book-notes')) $('cp-book-notes').value = appt.notes || '';
+  syncPortalBookingMode();
+  showToast('Update the booking form below to reschedule this appointment.', 'info');
 }
 
 function cancelCustomerAppt(id) {
@@ -1238,6 +1263,7 @@ function cancelCustomerAppt(id) {
   saveDB();
   renderAppts();
   updateDashboard();
+  if (portalEditingAppointmentId === id) resetCustomerBookingForm();
   renderCustomerPortalProfile();
   showToast('Appointment canceled.', 'success');
 }
@@ -1267,23 +1293,32 @@ function saveCustomerPortalBooking() {
     tech: $('cp-book-tech').value === 'Any Available' ? 'No Preference' : $('cp-book-tech').value,
     prefs: $('cp-book-notes').value
   });
-  var appt = {
-    id: Date.now(),
-    customerUserId: currentCustomer.id,
-    client: currentCustomer.name,
-    phone: currentCustomer.phone,
-    email: currentCustomer.email,
-    service: service.name,
-    price: parseFloat(service.price) || 0,
-    tech: $('cp-book-tech').value,
-    date: date,
-    time: time,
-    color: $('cp-book-color').value,
-    notes: $('cp-book-notes').value,
-    recur: 'none',
-    status: 'Scheduled'
-  };
-  DB.appointments.push(appt);
+  var isEditingPortalBooking = !!portalEditingAppointmentId;
+  var appt = portalEditingAppointmentId
+    ? DB.appointments.find(function(a) { return a.id === portalEditingAppointmentId; })
+    : null;
+  if (!appt) {
+    appt = {
+      id: Date.now(),
+      customerUserId: currentCustomer.id,
+      recur: 'none',
+      status: 'Scheduled'
+    };
+    DB.appointments.push(appt);
+  }
+  appt.customerUserId = currentCustomer.id;
+  appt.client = currentCustomer.name;
+  appt.phone = currentCustomer.phone;
+  appt.email = currentCustomer.email;
+  appt.service = service.name;
+  appt.price = parseFloat(service.price) || 0;
+  appt.tech = $('cp-book-tech').value;
+  appt.date = date;
+  appt.time = time;
+  appt.color = $('cp-book-color').value;
+  appt.notes = $('cp-book-notes').value;
+  appt.recur = 'none';
+  appt.status = 'Scheduled';
   client.tech = appt.tech === 'Any Available' ? client.tech : appt.tech;
   if (appt.notes) client.prefs = appt.notes;
   saveDB();
@@ -1291,10 +1326,10 @@ function saveCustomerPortalBooking() {
   renderAppts();
   renderClients('');
   updateDashboard();
+  resetCustomerBookingForm();
   renderCustomerPortalProfile();
   if (currentCustomer.email) sendEmailConfirmation(appt, currentCustomer.email);
-  ['cp-book-color','cp-book-notes'].forEach(function(id) { if ($(id)) $(id).value = ''; });
-  showToast('Appointment booked.', 'success');
+  showToast(isEditingPortalBooking ? 'Appointment updated.' : 'Appointment booked.', 'success');
 }
 
 // ── TOAST NOTIFICATIONS ───────────────────────────
@@ -2150,24 +2185,25 @@ function ngLineTotal(a) {
 function updateDashboard() {
   var todStr = today();
   var todAppts = DB.appointments.concat(DB.walkin).filter(function(a) { return a.date === todStr; });
-  var done = todAppts.filter(function(a) { return a.status === 'Completed'; });
+  var activeTodAppts = todAppts.filter(function(a) { return a.status !== 'Canceled' && a.status !== 'No-Show'; });
+  var done = activeTodAppts.filter(function(a) { return a.status === 'Completed'; });
   var rev = done.reduce(function(s,a) { return s + ngLineTotal(a); }, 0);
   var queue = DB.walkin.filter(function(w) { return w.status === 'Scheduled'; }).length;
 
   var set = function(id, val) { var el=$(id); if(el) el.textContent = val; };
   set('hdr-rev',   fmt(rev));
-  set('hdr-appts', todAppts.length);
+  set('hdr-appts', activeTodAppts.length);
   set('hdr-queue', queue);
   set('d-rev',     fmt(rev));
-  set('d-appts',   todAppts.length);
+  set('d-appts',   activeTodAppts.length);
   set('d-queue',   queue);
   set('d-techs',   DB.techs.length);
   set('d-rev-note', done.length + ' services completed');
 
   var sched = $('todaySchedule');
   if (sched) {
-    sched.innerHTML = todAppts.length
-      ? todAppts.sort(function(a,b){return a.time>b.time?1:-1;}).map(function(a) {
+    sched.innerHTML = activeTodAppts.length
+      ? activeTodAppts.sort(function(a,b){return a.time>b.time?1:-1;}).map(function(a) {
           return '<div class="appt-slot">'
             + '<div class="slot-time">' + (a.time || 'Walk-In') + '</div>'
             + '<div><div class="slot-client">' + a.client + '</div><div class="slot-svc">' + a.service + ' · ' + a.tech + (a.color ? ' · 💅 ' + a.color : '') + '</div></div>'
@@ -2216,14 +2252,14 @@ function updateDashboard() {
 // ── SETTINGS ──────────────────────────────────────
 function loadSettingsForm() {
   var s = DB.settings;
-  var fields = ['shopName','phone','address','openTime','closeTime','instagram','taxRate','stripeKey','twilioSid','twilioToken','twilioPhone','emailFrom'];
+  var fields = ['shopName','phone','address','openTime','closeTime','instagram','taxRate','stripeKey','twilioSid','twilioToken','twilioPhone','emailFrom','cancelPolicy'];
   fields.forEach(function(f) {
     var el = $('set-' + f); if (el) el.value = s[f] || '';
   });
 }
 
 function saveSettings() {
-  var fields = ['shopName','phone','address','openTime','closeTime','instagram','taxRate','stripeKey','twilioSid','twilioToken','twilioPhone','emailFrom'];
+  var fields = ['shopName','phone','address','openTime','closeTime','instagram','taxRate','stripeKey','twilioSid','twilioToken','twilioPhone','emailFrom','cancelPolicy'];
   fields.forEach(function(f) {
     var el = $('set-' + f); if (el) DB.settings[f] = el.value;
   });

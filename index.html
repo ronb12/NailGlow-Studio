@@ -39,6 +39,8 @@ header::before{content:'✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ 
 .logo-name{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;color:var(--white);letter-spacing:0.04em;line-height:1;}
 .logo-sub{font-size:0.6rem;color:rgba(255,220,240,0.8);letter-spacing:0.18em;text-transform:uppercase;}
 .header-stats{display:flex;gap:2rem;}
+.header-user{display:flex;align-items:center;gap:1rem;}
+.header-user-meta{text-align:right;}
 .hdr-stat{text-align:center;}
 .hdr-stat-val{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:#ffe0f2;}
 .hdr-stat-lbl{font-size:0.58rem;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.12em;}
@@ -156,7 +158,13 @@ td{padding:10px 14px;font-size:0.85rem;}
 .color-chip{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:all 0.2s;}
 .color-chip:hover,.color-chip.selected{border-color:#e91e8c;transform:scale(1.2);}
 
-@media(max-width:640px){.header-stats{display:none;}.container{padding:1rem;}.grid-4{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:640px){
+  .header-stats{display:none;}
+  .header-inner{padding:0 1rem;height:auto;min-height:66px;gap:1rem;}
+  .header-user{margin-left:auto;}
+  .container{padding:1rem;}
+  .grid-4{grid-template-columns:repeat(2,1fr);}
+}
 
 /* Toast */
 .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);background:#2a0018;color:white;padding:10px 20px;border-radius:30px;font-size:0.85rem;z-index:9998;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;}
@@ -165,12 +173,204 @@ td{padding:10px 14px;font-size:0.85rem;}
 .toast-error{background:#c0392b;}
 .toast-info{background:#1a4a7a;}
 
+.landing-shell{min-height:100vh;background:
+  radial-gradient(circle at top left, rgba(255,255,255,0.7), transparent 30%),
+  linear-gradient(135deg,#5a1237 0%,#b5006e 45%,#f06dab 100%);
+  color:var(--white);
+}
+.landing-hero{max-width:1200px;margin:0 auto;padding:4.5rem 1.5rem 3rem;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,0.8fr);gap:2rem;align-items:center;}
+.landing-copy h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,5vw,5rem);line-height:0.95;margin-bottom:1rem;}
+.landing-copy p{max-width:620px;font-size:1rem;line-height:1.7;color:rgba(255,240,248,0.92);}
+.landing-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:2rem;}
+.landing-kpi{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);border-radius:18px;padding:1rem;backdrop-filter:blur(10px);}
+.landing-kpi strong{display:block;font-family:'Cormorant Garamond',serif;font-size:2rem;}
+.landing-kpi span{display:block;font-size:0.76rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,235,245,0.78);}
+.landing-actions{display:flex;flex-wrap:wrap;gap:0.85rem;margin-top:2rem;}
+.landing-actions .btn{font-size:0.9rem;padding:12px 22px;}
+.landing-actions .btn-outline{border-color:rgba(255,255,255,0.55);color:var(--white);}
+.landing-actions .btn-outline:hover{background:rgba(255,255,255,0.12);}
+.landing-card{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.16);border-radius:28px;padding:1.5rem;backdrop-filter:blur(14px);box-shadow:0 24px 60px rgba(42,0,24,0.22);}
+.landing-card h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;margin-bottom:0.75rem;}
+.landing-card p{font-size:0.92rem;line-height:1.6;color:rgba(255,242,248,0.88);}
+.landing-list{display:grid;gap:0.75rem;margin-top:1.25rem;}
+.landing-list-item{display:flex;align-items:flex-start;gap:0.8rem;padding:0.85rem 0.95rem;background:rgba(255,255,255,0.1);border-radius:18px;}
+.landing-list-item strong{display:block;font-size:0.88rem;}
+.landing-list-item span{display:block;font-size:0.74rem;color:rgba(255,232,243,0.72);}
+.landing-sections{max-width:1200px;margin:0 auto;padding:0 1.5rem 4rem;display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+.landing-band{background:var(--white);border-radius:22px;padding:1.4rem;border:1px solid var(--border);box-shadow:0 14px 36px rgba(42,0,24,0.08);color:var(--ink);}
+.landing-band h4{font-family:'Cormorant Garamond',serif;font-size:1.35rem;margin-bottom:0.35rem;color:#800050;}
+.landing-band p{font-size:0.84rem;line-height:1.6;color:var(--smoke);}
+.landing-badges{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.85rem;}
+.landing-badges .badge{font-size:0.68rem;}
+.portal-shell{min-height:100vh;background:linear-gradient(180deg,#fff6fb 0%,#ffe8f3 100%);padding:1.5rem;}
+.portal-wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,0.92fr) minmax(0,1.08fr);gap:1.5rem;}
+.portal-card{background:var(--white);border:1px solid var(--border);border-radius:22px;padding:1.5rem;box-shadow:0 10px 30px rgba(233,30,140,0.12);}
+.portal-title{font-family:'Cormorant Garamond',serif;font-size:2rem;color:#800050;margin-bottom:0.35rem;}
+.portal-sub{font-size:0.84rem;color:var(--smoke);line-height:1.6;}
+.portal-stack{display:grid;gap:1rem;margin-top:1.2rem;}
+.portal-empty{padding:1rem;border:1px dashed var(--border);border-radius:14px;color:var(--smoke);font-size:0.84rem;text-align:center;background:var(--rose-pale);}
+.portal-appt{border:1px solid var(--border);border-radius:16px;padding:1rem;background:var(--rose-pale);}
+.portal-appt-top{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;}
+.portal-appt-title{font-weight:700;font-size:0.95rem;color:#800050;}
+.portal-appt-meta{font-size:0.78rem;color:var(--smoke);line-height:1.5;margin-top:0.35rem;}
+.portal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.9rem;}
+.portal-actions{display:flex;flex-wrap:wrap;gap:0.65rem;margin-top:0.8rem;}
+.portal-banner{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding:1rem 1.15rem;background:linear-gradient(135deg,#800050,#e91e8c);color:var(--white);border-radius:18px;margin-bottom:1rem;}
+.portal-banner strong{font-family:'Cormorant Garamond',serif;font-size:1.6rem;display:block;}
+.portal-banner span{font-size:0.78rem;color:rgba(255,240,248,0.82);}
+
+@media(max-width:900px){
+  .landing-hero,.portal-wrap{grid-template-columns:1fr;}
+  .landing-kpis{grid-template-columns:1fr;}
+}
+
 </style>
 </head>
 <body>
 
 <!-- Toast -->
 <div id="toast" class="toast"></div>
+
+<!-- Public landing page -->
+<div id="publicLanding" class="landing-shell">
+  <section class="landing-hero">
+    <div class="landing-copy">
+      <div class="logo" style="margin-bottom:1.5rem;">
+        <div class="logo-gem" style="font-size:2.2rem;">💎</div>
+        <div><div class="logo-name" style="font-size:2rem;">NailGlow Studio</div><div class="logo-sub">Modern nail bookings and client care</div></div>
+      </div>
+      <h1>Book polished looks, favorite your tech, and manage every visit in one place.</h1>
+      <p>NailGlow gives clients a clean, mobile-friendly portal for booking manicures, pedicures, acrylics, and nail art while the studio team runs the calendar, checkout, reminders, and customer history behind the scenes.</p>
+      <div class="landing-actions">
+        <button class="btn btn-primary" onclick="showCustomerPortal()">Open Customer Portal</button>
+        <button class="btn btn-outline" onclick="beginOwnerAccess()">Owner Sign In</button>
+      </div>
+      <div class="landing-kpis">
+        <div class="landing-kpi"><strong id="landing-service-count">10</strong><span>Bookable services</span></div>
+        <div class="landing-kpi"><strong id="landing-tech-count">0</strong><span>Technicians listed</span></div>
+        <div class="landing-kpi"><strong id="landing-client-count">0</strong><span>Clients served</span></div>
+      </div>
+    </div>
+    <div class="landing-card">
+      <h3>Client-first salon flow</h3>
+      <p>Customers can create an account, rebook, check upcoming appointments, and keep their style notes attached to the studio profile. Owners still get the full shop dashboard after sign-in.</p>
+      <div class="landing-list">
+        <div class="landing-list-item"><div>📅</div><div><strong>Book by service and time</strong><span>Pick the service, date, time, technician, and color/design notes.</span></div></div>
+        <div class="landing-list-item"><div>👤</div><div><strong>Customer accounts</strong><span>Sign in again later to review upcoming appointments and visit history.</span></div></div>
+        <div class="landing-list-item"><div>💌</div><div><strong>Built-in follow-up</strong><span>Keep reminder email, SMS, and rebooking hooks ready for your backend tools.</span></div></div>
+      </div>
+    </div>
+  </section>
+  <section class="landing-sections">
+    <div class="landing-band">
+      <h4>Popular services</h4>
+      <p id="landing-service-preview">Classic manicures, gel polish, acrylic sets, pedicures, and nail art all stay organized inside the portal.</p>
+      <div class="landing-badges" id="landing-service-badges"></div>
+    </div>
+    <div class="landing-band">
+      <h4>For repeat clients</h4>
+      <p>Create an account once, then come back to manage your next appointment, update style notes, and keep your favorite technician attached to your profile.</p>
+    </div>
+    <div class="landing-band">
+      <h4>For studio owners</h4>
+      <p>Owner access opens the full NailGlow operations dashboard with appointments, walk-ins, checkout, products, nail inspo, reports, and staff controls.</p>
+    </div>
+  </section>
+</div>
+
+<!-- Customer portal -->
+<div id="customerPortalScreen" class="portal-shell" style="display:none;">
+  <div class="portal-wrap">
+    <div class="portal-card">
+      <div style="display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;">
+        <div>
+          <div class="portal-title">Customer Portal</div>
+          <div class="portal-sub">Sign in to manage appointments, or create an account to book your next nail service with saved details.</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="showLanding()">Back to Site</button>
+      </div>
+      <div id="customerAuthBlock">
+        <div class="portal-stack">
+          <div class="portal-card" style="padding:1rem;background:var(--rose-pale);">
+            <div class="card-title" style="margin-bottom:0.75rem;">Sign In</div>
+            <div class="form-grid">
+              <div class="field"><label>Email</label><input id="cp-login-email" type="text" inputmode="email" autocomplete="username" placeholder="you@example.com"></div>
+              <div class="field"><label>Password</label><input id="cp-login-pass" type="password" placeholder="Your password"></div>
+            </div>
+            <div id="cp-login-err" style="font-size:0.8rem;color:#c0392b;min-height:1rem;margin-top:0.65rem;"></div>
+            <div class="portal-actions">
+              <button class="btn btn-primary" onclick="customerLogin()">Sign In</button>
+            </div>
+          </div>
+          <div class="portal-card" style="padding:1rem;">
+            <div class="card-title" style="margin-bottom:0.75rem;">Create Account</div>
+            <div class="form-grid">
+              <div class="field"><label>Full Name</label><input id="cp-name" placeholder="Jamie Carter"></div>
+              <div class="field"><label>Phone</label><input id="cp-phone" placeholder="(504) 555-0100"></div>
+              <div class="field"><label>Email</label><input id="cp-email" type="text" inputmode="email" autocomplete="email" placeholder="jamie@example.com"></div>
+              <div class="field"><label>Password</label><input id="cp-pass" type="password" placeholder="At least 8 characters"></div>
+            </div>
+            <div id="cp-signup-err" style="font-size:0.8rem;color:#c0392b;min-height:1rem;margin-top:0.65rem;"></div>
+            <div class="portal-actions">
+              <button class="btn btn-primary" onclick="createCustomerAccount()">Create Account</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="customerSignedInBlock" style="display:none;">
+        <div class="portal-banner">
+          <div><strong id="cp-greeting">Welcome back</strong><span id="cp-greeting-sub">Manage your upcoming visits and book your next set.</span></div>
+          <button class="btn btn-outline btn-sm" onclick="customerLogout()" style="color:white;border-color:rgba(255,255,255,0.4);">Log Out</button>
+        </div>
+        <div class="portal-grid">
+          <div class="portal-card" style="padding:1rem;">
+            <div class="card-title">Profile</div>
+            <div id="cp-profile" class="portal-sub" style="margin-top:0.6rem;"></div>
+          </div>
+          <div class="portal-card" style="padding:1rem;">
+            <div class="card-title">Visit Summary</div>
+            <div id="cp-stats" class="portal-sub" style="margin-top:0.6rem;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="portal-card">
+      <div class="card-title" style="margin-bottom:0.35rem;">Book Your Next Appointment</div>
+      <div class="portal-sub">Choose a service, date, time, and technician. Signed-in customers get their booking history and upcoming appointments below.</div>
+      <div class="portal-stack">
+        <div class="portal-card" style="padding:1rem;background:var(--rose-pale);">
+          <div class="portal-grid">
+            <div class="field"><label>Service</label><select id="cp-book-service"></select></div>
+            <div class="field"><label>Technician</label><select id="cp-book-tech"></select></div>
+            <div class="field"><label>Date</label><input id="cp-book-date" type="date"></div>
+            <div class="field"><label>Time</label><select id="cp-book-time">
+              <option>9:00 AM</option><option>9:30 AM</option><option>10:00 AM</option><option>10:30 AM</option>
+              <option>11:00 AM</option><option>11:30 AM</option><option>12:00 PM</option><option>12:30 PM</option>
+              <option>1:00 PM</option><option>1:30 PM</option><option>2:00 PM</option><option>2:30 PM</option>
+              <option>3:00 PM</option><option>3:30 PM</option><option>4:00 PM</option><option>4:30 PM</option>
+              <option>5:00 PM</option><option>5:30 PM</option>
+            </select></div>
+            <div class="field"><label>Color / Design</label><input id="cp-book-color" placeholder="French chrome, ombre pink..."></div>
+            <div class="field"><label>Email</label><input id="cp-book-email" type="text" inputmode="email" autocomplete="email" placeholder="Used for confirmations"></div>
+            <div class="field" style="grid-column:1/-1"><label>Style Notes</label><textarea id="cp-book-notes" placeholder="Shape, length, inspo, allergies, preferred finish..."></textarea></div>
+          </div>
+          <div id="cp-booking-err" style="font-size:0.8rem;color:#c0392b;min-height:1rem;margin-top:0.65rem;"></div>
+          <div class="portal-actions">
+            <button class="btn btn-primary" onclick="saveCustomerPortalBooking()">Book Appointment</button>
+          </div>
+        </div>
+        <div>
+          <div class="card-title" style="margin-bottom:0.7rem;">Upcoming Appointments</div>
+          <div id="cp-upcoming" class="portal-empty">Sign in to see and manage your upcoming appointments.</div>
+        </div>
+        <div>
+          <div class="card-title" style="margin-bottom:0.7rem;">Visit History</div>
+          <div id="cp-history" class="portal-empty">Completed visits will appear here once your appointments are checked out.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Login Screen -->
 <div id="loginScreen" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#800050,#e91e8c);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
@@ -182,13 +382,14 @@ td{padding:10px 14px;font-size:0.85rem;}
     </div>
     <div style="display:flex;flex-direction:column;gap:0.75rem;">
       <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#8b1a4a;">Email</label>
-        <input id="login-email" type="email" placeholder="your-owner@email.com" autocomplete="username" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
+        <input id="login-email" type="text" inputmode="email" placeholder="your-owner@email.com" autocomplete="username" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
       </div>
       <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#8b1a4a;">Password</label>
         <input id="login-pass" type="password" placeholder="Your password" autocomplete="current-password" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;outline:none;">
       </div>
       <div id="login-err" style="color:#e91e8c;font-size:0.8rem;min-height:1rem;"></div>
       <button type="button" onclick="doLogin()" style="background:#e91e8c;color:white;border:none;border-radius:30px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;">Sign In 💅</button>
+      <button type="button" onclick="showLanding()" style="background:white;color:#8b1a4a;border:1px solid #ffb3d9;border-radius:30px;padding:11px;font-size:0.92rem;font-weight:600;cursor:pointer;width:100%;">Back to site</button>
       <div style="text-align:center;">
         <button type="button" onclick="openForgotPasswordModal()" style="background:none;border:none;color:#8b1a4a;font-size:0.82rem;text-decoration:underline;cursor:pointer;padding:0.35rem 0;font-family:'Jost',sans-serif;">Forgot password?</button>
       </div>
@@ -224,7 +425,7 @@ td{padding:10px 14px;font-size:0.85rem;}
     </div>
     <div style="display:flex;flex-direction:column;gap:0.65rem;">
       <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;color:#8b1a4a;">Owner email</label>
-        <input id="setup-email" type="email" readonly style="width:100%;background:#fff5f9;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;">
+        <input id="setup-email" type="text" inputmode="email" readonly style="width:100%;background:#fff5f9;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;">
       </div>
       <div><label style="font-size:0.72rem;font-weight:600;text-transform:uppercase;color:#8b1a4a;">New password (min 8)</label>
         <input id="setup-pass" type="password" autocomplete="new-password" style="width:100%;background:#fff0f8;border:1px solid #ffb3d9;border-radius:10px;padding:10px 14px;font-size:0.9rem;margin-top:4px;">
@@ -234,6 +435,7 @@ td{padding:10px 14px;font-size:0.85rem;}
       </div>
       <div id="setup-err" style="color:#e91e8c;font-size:0.8rem;min-height:1rem;"></div>
       <button type="button" onclick="completeOwnerPasswordSetup()" style="background:#e91e8c;color:white;border:none;border-radius:30px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;">Save &amp; continue</button>
+      <button type="button" onclick="showLanding()" style="background:white;color:#8b1a4a;border:1px solid #ffb3d9;border-radius:30px;padding:11px;font-size:0.92rem;font-weight:600;cursor:pointer;width:100%;">Back to site</button>
     </div>
   </div>
 </div>
@@ -260,7 +462,7 @@ td{padding:10px 14px;font-size:0.85rem;}
           <option>5:00 PM</option><option>5:30 PM</option>
         </select>
       </div>
-      <div class="field"><label>Recurring</label><select id="a-recur"><option value="none">One-time</option><option value="weekly">Weekly</option><option value="biweekly">Every 2 Weeks</option><option value="monthly">Monthly</option></select></div><div class="field"><label>Client Email</label><input id="a-email" type="email" placeholder="For confirmation"></div><div class="field" style="grid-column:1/-1"><label>Nail Color / Design Notes</label><input id="a-color" placeholder="Nude pink with gold accent, ref: photo on file..."></div>
+      <div class="field"><label>Recurring</label><select id="a-recur"><option value="none">One-time</option><option value="weekly">Weekly</option><option value="biweekly">Every 2 Weeks</option><option value="monthly">Monthly</option></select></div><div class="field"><label>Client Email</label><input id="a-email" type="text" inputmode="email" autocomplete="email" placeholder="For confirmation"></div><div class="field" style="grid-column:1/-1"><label>Nail Color / Design Notes</label><input id="a-color" placeholder="Nude pink with gold accent, ref: photo on file..."></div>
       <div class="field" style="grid-column:1/-1"><label>Additional Notes</label><textarea id="a-notes" placeholder="Sensitive cuticles, prefers no drill..."></textarea></div>
     </div>
     <div class="modal-actions">
@@ -276,7 +478,7 @@ td{padding:10px 14px;font-size:0.85rem;}
     <div class="form-grid">
       <div class="field"><label>Full Name</label><input id="c-name" placeholder="Jane Smith"></div>
       <div class="field"><label>Phone</label><input id="c-phone" placeholder="(504) 555-0100"></div>
-      <div class="field"><label>Email</label><input id="c-email" placeholder="jane@email.com"></div>
+      <div class="field"><label>Email</label><input id="c-email" type="text" inputmode="email" autocomplete="email" placeholder="jane@email.com"></div>
       <div class="field"><label>Birthday (for promo)</label><input type="date" id="c-bday"></div>
       <div class="field"><label>Preferred Tech</label><select id="c-tech"><option>No Preference</option></select></div>
       <div class="field"><label>Allergies</label><input id="c-allergy" placeholder="Acrylic monomer, gel UV..."></div>
@@ -328,8 +530,9 @@ td{padding:10px 14px;font-size:0.85rem;}
       <div class="hdr-stat"><div class="hdr-stat-val" id="hdr-rev">$0</div><div class="hdr-stat-lbl">Today's Revenue</div></div>
       <div class="hdr-stat"><div class="hdr-stat-val" id="hdr-appts">0</div><div class="hdr-stat-lbl">Appointments</div></div>
       <div class="hdr-stat"><div class="hdr-stat-val" id="hdr-queue">0</div><div class="hdr-stat-lbl">In Queue</div></div>
-      <div style="display:flex;align-items:center;gap:1rem;">
-      <div style="text-align:right">
+    </div>
+    <div class="header-user">
+      <div class="header-user-meta">
         <div id="current-user-name" style="font-size:0.8rem;color:white;font-weight:600;">—</div>
         <div id="current-user-role" style="font-size:0.65rem;color:rgba(255,220,240,0.7);text-transform:uppercase;letter-spacing:0.1em;">—</div>
       </div>
@@ -570,7 +773,7 @@ td{padding:10px 14px;font-size:0.85rem;}
       <div class="card-hdr"><span class="card-title">Add Staff Member</span></div>
       <div class="form-grid">
         <div class="field"><label>Full Name</label><input id="st-name" placeholder="Lisa Nguyen"></div>
-        <div class="field"><label>Email</label><input id="st-email" type="email" placeholder="lisa@nailglow.com"></div>
+        <div class="field"><label>Email</label><input id="st-email" type="text" inputmode="email" autocomplete="email" placeholder="lisa@nailglow.com"></div>
         <div class="field"><label>Password</label><input id="st-pass" type="password" placeholder="Set password"></div>
         <div class="field"><label>Role</label>
           <select id="st-role">
@@ -627,7 +830,7 @@ td{padding:10px 14px;font-size:0.85rem;}
       </div>
       <div class="card-hdr" style="margin-top:1.25rem"><span class="card-title">📧 Email</span></div>
       <div class="form-grid">
-        <div class="field" style="grid-column:1/-1"><label>From Email</label><input id="set-emailFrom" placeholder="hello@nailglow.com"></div>
+        <div class="field" style="grid-column:1/-1"><label>From Email</label><input id="set-emailFrom" type="text" inputmode="email" autocomplete="email" placeholder="hello@nailglow.com"></div>
       </div>
       <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--smoke)">Email opens your mail client. For automated emails, connect SendGrid or Mailgun to your backend.</div>
       <div style="margin-top:1rem"><button class="btn btn-primary" onclick="saveSettings()">Save All Settings</button></div>
@@ -656,7 +859,8 @@ td{padding:10px 14px;font-size:0.85rem;}
 
 // ── CONSTANTS ────────────────────────────────────
 const STORE_KEY = 'nailglow_v1';
-const ROLES = { owner: 'Owner', manager: 'Manager', tech: 'Technician' };
+const CUSTOMER_SESSION_KEY = 'nailglow_customer_session';
+const ROLES = { owner: 'Owner', manager: 'Manager', tech: 'Technician', customer: 'Customer' };
 
 // ── DEFAULT DATA ──────────────────────────────────
 const DEFAULT_DATA = {
@@ -708,6 +912,7 @@ const DEFAULT_DATA = {
 // ── STATE ─────────────────────────────────────────
 var DB = JSON.parse(JSON.stringify(DEFAULT_DATA));
 var currentUser = null;
+var currentCustomer = null;
 var checkoutId = null;
 var selectedColors = [];
 var pendingRecurring = null;
@@ -745,6 +950,353 @@ function loadDB() {
   }
 }
 
+function normalizeEmail(v) {
+  return String(v || '').trim().toLowerCase();
+}
+
+function customerUsers() {
+  return DB.users.filter(function(u) { return u.role === 'customer'; });
+}
+
+function persistCustomerSession() {
+  try {
+    if (currentCustomer && currentCustomer.id) localStorage.setItem(CUSTOMER_SESSION_KEY, String(currentCustomer.id));
+    else localStorage.removeItem(CUSTOMER_SESSION_KEY);
+  } catch (e) {
+    console.warn('Customer session save failed:', e.message);
+  }
+}
+
+function restoreCustomerSession() {
+  try {
+    var raw = localStorage.getItem(CUSTOMER_SESSION_KEY);
+    if (!raw) return null;
+    var id = Number(raw);
+    if (!id) return null;
+    currentCustomer = DB.users.find(function(u) { return u.id === id && u.role === 'customer'; }) || null;
+    return currentCustomer;
+  } catch (e) {
+    console.warn('Customer session restore failed:', e.message);
+    return null;
+  }
+}
+
+function findClientForCustomer(user) {
+  if (!user) return null;
+  return DB.clients.find(function(cl) {
+    return (cl.customerUserId && cl.customerUserId === user.id)
+      || (normalizeEmail(cl.email) && normalizeEmail(cl.email) === normalizeEmail(user.email))
+      || ((cl.name || '').trim().toLowerCase() === (user.name || '').trim().toLowerCase() && (cl.phone || '') === (user.phone || ''));
+  }) || null;
+}
+
+function upsertClientForCustomer(user, extra) {
+  if (!user) return null;
+  var patch = extra || {};
+  var client = findClientForCustomer(user);
+  if (!client) {
+    client = {
+      id: Date.now(),
+      customerUserId: user.id,
+      name: user.name || '',
+      phone: user.phone || '',
+      email: user.email || '',
+      bday: '',
+      tech: patch.tech || 'No Preference',
+      allergy: '',
+      prefs: patch.prefs || '',
+      visits: 0,
+      spent: 0,
+      lastVisit: '—'
+    };
+    DB.clients.push(client);
+  } else {
+    client.customerUserId = user.id;
+    if (user.name) client.name = user.name;
+    if (user.phone) client.phone = user.phone;
+    if (user.email) client.email = user.email;
+    if (patch.tech) client.tech = patch.tech;
+    if (patch.prefs) client.prefs = patch.prefs;
+    if (patch.allergy) client.allergy = patch.allergy;
+  }
+  return client;
+}
+
+function getCustomerAppointments(user, bucket) {
+  if (!user) return [];
+  return DB.appointments.filter(function(a) {
+    var owns = (a.customerUserId && a.customerUserId === user.id)
+      || (normalizeEmail(a.email) && normalizeEmail(a.email) === normalizeEmail(user.email))
+      || ((a.client || '').trim().toLowerCase() === (user.name || '').trim().toLowerCase() && (a.phone || '') === (user.phone || ''));
+    if (!owns) return false;
+    if (bucket === 'upcoming') return a.status === 'Scheduled';
+    if (bucket === 'history') return a.status === 'Completed' || a.status === 'Canceled' || a.status === 'No-Show';
+    return true;
+  }).sort(function(a, b) {
+    var ad = String(a.date || '') + ' ' + String(a.time || '');
+    var bd = String(b.date || '') + ' ' + String(b.time || '');
+    return ad > bd ? 1 : -1;
+  });
+}
+
+function hideAllEntryScreens() {
+  ['publicLanding','customerPortalScreen','loginScreen','setupScreen','appScreen'].forEach(function(id) {
+    var el = $(id);
+    if (!el) return;
+    el.style.display = id === 'appScreen' ? 'none' : 'none';
+  });
+}
+
+function renderLanding() {
+  var svcCount = $('landing-service-count');
+  var techCount = $('landing-tech-count');
+  var clientCount = $('landing-client-count');
+  var preview = $('landing-service-preview');
+  var badges = $('landing-service-badges');
+  if (svcCount) svcCount.textContent = DB.services.length;
+  if (techCount) techCount.textContent = DB.techs.length;
+  if (clientCount) clientCount.textContent = DB.clients.length;
+  if (preview) {
+    preview.textContent = DB.services.slice(0, 5).map(function(s) { return s.name; }).join(', ') + '.';
+  }
+  if (badges) {
+    badges.innerHTML = DB.services.slice(0, 6).map(function(s) {
+      return '<span class="badge badge-rose">' + s.name + '</span>';
+    }).join('');
+  }
+}
+
+function showLanding() {
+  closeForgotPasswordModal();
+  hideAllEntryScreens();
+  var landing = $('publicLanding');
+  if (landing) landing.style.display = 'block';
+  renderLanding();
+}
+
+function beginOwnerAccess() {
+  if (needsOwnerPasswordSetup()) showSetupScreen();
+  else showLogin();
+}
+
+function renderCustomerPortalAuth() {
+  var auth = $('customerAuthBlock');
+  var signed = $('customerSignedInBlock');
+  if (!auth || !signed) return;
+  auth.style.display = currentCustomer ? 'none' : 'block';
+  signed.style.display = currentCustomer ? 'block' : 'none';
+}
+
+function renderCustomerPortalLists() {
+  var upcoming = $('cp-upcoming');
+  var history = $('cp-history');
+  if (!upcoming || !history) return;
+  if (!currentCustomer) {
+    upcoming.className = 'portal-empty';
+    history.className = 'portal-empty';
+    upcoming.textContent = 'Sign in to see and manage your upcoming appointments.';
+    history.textContent = 'Completed visits will appear here once your appointments are checked out.';
+    return;
+  }
+  var upcomingList = getCustomerAppointments(currentCustomer, 'upcoming');
+  var historyList = getCustomerAppointments(currentCustomer, 'history');
+  upcoming.className = '';
+  history.className = '';
+  upcoming.innerHTML = upcomingList.length ? upcomingList.map(function(a) {
+    return '<div class="portal-appt">'
+      + '<div class="portal-appt-top"><div><div class="portal-appt-title">' + a.service + '</div><div class="portal-appt-meta">' + a.date + ' at ' + a.time + '<br>' + (a.tech || 'Any available') + ' · ' + fmt(a.price) + (a.color ? '<br>Design: ' + a.color : '') + '</div></div><span class="badge badge-gold">' + a.status + '</span></div>'
+      + '<div class="portal-actions"><button class="btn btn-outline btn-sm" onclick="rescheduleCustomerAppt(' + a.id + ')">Reschedule</button><button class="btn btn-danger btn-sm" onclick="cancelCustomerAppt(' + a.id + ')">Cancel</button></div>'
+      + '</div>';
+  }).join('') : '<div class="portal-empty">No upcoming appointments yet. Book one below and it will appear here.</div>';
+  history.innerHTML = historyList.length ? historyList.slice().reverse().map(function(a) {
+    return '<div class="portal-appt">'
+      + '<div class="portal-appt-top"><div><div class="portal-appt-title">' + a.service + '</div><div class="portal-appt-meta">' + a.date + ' at ' + a.time + '<br>' + (a.tech || 'Any available') + ' · ' + fmt(ngLineTotal(a)) + (a.color ? '<br>Design: ' + a.color : '') + '</div></div><span class="badge ' + (a.status === 'Completed' ? 'badge-green' : 'badge-rose') + '">' + a.status + '</span></div>'
+      + '</div>';
+  }).join('') : '<div class="portal-empty">Completed visits will appear here after checkout.</div>';
+}
+
+function renderCustomerPortalProfile() {
+  renderCustomerPortalAuth();
+  var greeting = $('cp-greeting');
+  var greetingSub = $('cp-greeting-sub');
+  var profile = $('cp-profile');
+  var stats = $('cp-stats');
+  if (!currentCustomer) {
+    renderCustomerPortalLists();
+    return;
+  }
+  var client = upsertClientForCustomer(currentCustomer);
+  var all = getCustomerAppointments(currentCustomer);
+  var upcoming = getCustomerAppointments(currentCustomer, 'upcoming');
+  var history = getCustomerAppointments(currentCustomer, 'history').filter(function(a) { return a.status === 'Completed'; });
+  if (greeting) greeting.textContent = 'Welcome back, ' + (currentCustomer.name || 'there');
+  if (greetingSub) greetingSub.textContent = upcoming.length ? 'Your next visit is ready to manage below.' : 'Book your next set whenever you are ready.';
+  if (profile) {
+    profile.innerHTML = (currentCustomer.email || 'No email on file')
+      + '<br>' + (currentCustomer.phone || 'No phone on file')
+      + '<br>Preferred tech: ' + (client.tech || 'No preference')
+      + (client.prefs ? '<br>Style notes: ' + client.prefs : '');
+  }
+  if (stats) {
+    stats.innerHTML = 'Upcoming: <strong>' + upcoming.length + '</strong><br>'
+      + 'Completed visits: <strong>' + history.length + '</strong><br>'
+      + 'Lifetime bookings: <strong>' + all.length + '</strong><br>'
+      + 'Total spent: <strong>' + fmt(client.spent || 0) + '</strong>';
+  }
+  var email = $('cp-book-email');
+  if (email && currentCustomer.email) email.value = currentCustomer.email;
+  renderCustomerPortalLists();
+}
+
+function showCustomerPortal() {
+  hideAllEntryScreens();
+  var portal = $('customerPortalScreen');
+  if (portal) portal.style.display = 'block';
+  restoreCustomerSession();
+  populateServiceSelects();
+  populateTechSelects();
+  renderCustomerPortalProfile();
+}
+
+function customerLogin() {
+  var email = normalizeEmail($('cp-login-email').value);
+  var pass = $('cp-login-pass').value;
+  var err = $('cp-login-err');
+  if (err) err.textContent = '';
+  var user = customerUsers().find(function(u) { return normalizeEmail(u.email) === email; });
+  if (!user || user.password !== pass) {
+    if (err) err.textContent = 'We could not match that email and password.';
+    return;
+  }
+  currentCustomer = user;
+  persistCustomerSession();
+  if ($('cp-login-pass')) $('cp-login-pass').value = '';
+  renderCustomerPortalProfile();
+  showToast('Welcome back to NailGlow.', 'success');
+}
+
+function createCustomerAccount() {
+  var name = String($('cp-name').value || '').trim();
+  var phone = String($('cp-phone').value || '').trim();
+  var email = normalizeEmail($('cp-email').value);
+  var pass = $('cp-pass').value;
+  var err = $('cp-signup-err');
+  if (err) err.textContent = '';
+  if (!name || !phone || !email || pass.length < 8) {
+    if (err) err.textContent = 'Add your name, phone, email, and a password with at least 8 characters.';
+    return;
+  }
+  if (DB.users.find(function(u) { return normalizeEmail(u.email) === email; })) {
+    if (err) err.textContent = 'That email already has an account.';
+    return;
+  }
+  currentCustomer = {
+    id: Date.now(),
+    name: name,
+    email: email,
+    password: pass,
+    phone: phone,
+    role: 'customer'
+  };
+  DB.users.push(currentCustomer);
+  upsertClientForCustomer(currentCustomer);
+  saveDB();
+  persistCustomerSession();
+  ['cp-name','cp-phone','cp-email','cp-pass'].forEach(function(id) { if ($(id)) $(id).value = ''; });
+  renderLanding();
+  renderCustomerPortalProfile();
+  showToast('Customer account created.', 'success');
+}
+
+function customerLogout() {
+  currentCustomer = null;
+  persistCustomerSession();
+  renderCustomerPortalProfile();
+  showToast('Signed out.', 'info');
+}
+
+function rescheduleCustomerAppt(id) {
+  var appt = DB.appointments.find(function(a) { return a.id === id; });
+  if (!appt || !currentCustomer) return;
+  var newDate = window.prompt('Enter the new date (YYYY-MM-DD)', appt.date || today());
+  if (!newDate) return;
+  var newTime = window.prompt('Enter the new time', appt.time || '10:00 AM');
+  if (!newTime) return;
+  appt.date = newDate;
+  appt.time = newTime;
+  saveDB();
+  renderAppts();
+  updateDashboard();
+  renderCustomerPortalProfile();
+  showToast('Appointment rescheduled.', 'success');
+}
+
+function cancelCustomerAppt(id) {
+  var appt = DB.appointments.find(function(a) { return a.id === id; });
+  if (!appt || !currentCustomer) return;
+  appt.status = 'Canceled';
+  saveDB();
+  renderAppts();
+  updateDashboard();
+  renderCustomerPortalProfile();
+  showToast('Appointment canceled.', 'success');
+}
+
+function saveCustomerPortalBooking() {
+  var err = $('cp-booking-err');
+  if (err) err.textContent = '';
+  if (!currentCustomer) {
+    if (err) err.textContent = 'Create an account or sign in before booking.';
+    return;
+  }
+  var serviceId = Number($('cp-book-service').value || 0);
+  var service = DB.services.find(function(s) { return s.id === serviceId; });
+  if (!service) {
+    if (err) err.textContent = 'Choose a service.';
+    return;
+  }
+  var date = $('cp-book-date').value;
+  var time = $('cp-book-time').value;
+  if (!date || !time) {
+    if (err) err.textContent = 'Choose a date and time.';
+    return;
+  }
+  currentCustomer.phone = String(currentCustomer.phone || $('cp-phone').value || '').trim();
+  if ($('cp-book-email').value) currentCustomer.email = normalizeEmail($('cp-book-email').value);
+  var client = upsertClientForCustomer(currentCustomer, {
+    tech: $('cp-book-tech').value === 'Any Available' ? 'No Preference' : $('cp-book-tech').value,
+    prefs: $('cp-book-notes').value
+  });
+  var appt = {
+    id: Date.now(),
+    customerUserId: currentCustomer.id,
+    client: currentCustomer.name,
+    phone: currentCustomer.phone,
+    email: currentCustomer.email,
+    service: service.name,
+    price: parseFloat(service.price) || 0,
+    tech: $('cp-book-tech').value,
+    date: date,
+    time: time,
+    color: $('cp-book-color').value,
+    notes: $('cp-book-notes').value,
+    recur: 'none',
+    status: 'Scheduled'
+  };
+  DB.appointments.push(appt);
+  client.tech = appt.tech === 'Any Available' ? client.tech : appt.tech;
+  if (appt.notes) client.prefs = appt.notes;
+  saveDB();
+  persistCustomerSession();
+  renderAppts();
+  renderClients('');
+  updateDashboard();
+  renderCustomerPortalProfile();
+  if (currentCustomer.email) sendEmailConfirmation(appt, currentCustomer.email);
+  ['cp-book-color','cp-book-notes'].forEach(function(id) { if ($(id)) $(id).value = ''; });
+  showToast('Appointment booked.', 'success');
+}
+
 // ── TOAST NOTIFICATIONS ───────────────────────────
 function showToast(msg, type) {
   var el = document.getElementById('toast');
@@ -762,6 +1314,7 @@ function needsOwnerPasswordSetup() {
 
 function showLogin() {
   closeForgotPasswordModal();
+  hideAllEntryScreens();
   var su = document.getElementById('setupScreen');
   if (su) su.style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
@@ -801,6 +1354,7 @@ function confirmForgotPasswordReset() {
 }
 
 function showSetupScreen() {
+  hideAllEntryScreens();
   var owner = DB.users.find(function(u) { return u.role === 'owner'; });
   var em = document.getElementById('setup-email');
   if (em && owner) em.value = owner.email;
@@ -837,6 +1391,7 @@ function completeOwnerPasswordSetup() {
 }
 
 function hideLogin() {
+  hideAllEntryScreens();
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'block';
 }
@@ -844,7 +1399,7 @@ function hideLogin() {
 function doLogin() {
   var email = document.getElementById('login-email').value.trim().toLowerCase();
   var pass  = document.getElementById('login-pass').value;
-  var user  = DB.users.find(function(u) { return u.email.toLowerCase() === email; });
+  var user  = DB.users.find(function(u) { return u.role !== 'customer' && u.email.toLowerCase() === email; });
   if (!user || user.password == null || user.password === '' || user.password !== pass) {
     document.getElementById('login-err').textContent = (!user || user.password == null || user.password === '')
       ? 'Invalid credentials or finish owner setup first.'
@@ -852,6 +1407,8 @@ function doLogin() {
     return;
   }
   currentUser = user;
+  currentCustomer = null;
+  persistCustomerSession();
   document.getElementById('login-err').textContent = '';
   document.getElementById('current-user-name').textContent = user.name;
   document.getElementById('current-user-role').textContent = ROLES[user.role] || user.role;
@@ -866,7 +1423,7 @@ function doLogin() {
 
 function doLogout() {
   currentUser = null;
-  showLogin();
+  showLanding();
 }
 
 function applyRolePermissions() {
@@ -924,12 +1481,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── POPULATE SELECTS ──────────────────────────────
 function populateTechSelects() {
-  ['a-tech','w-tech','c-tech','fTech'].forEach(function(id) {
+  ['a-tech','w-tech','c-tech','fTech','cp-book-tech'].forEach(function(id) {
     var s = $(id); if (!s) return;
     var v = s.value;
     s.innerHTML = id === 'fTech'
       ? '<option value="">All</option>'
-      : '<option>' + (id === 'a-tech' ? 'Any Available' : 'Next Available') + '</option>';
+      : '<option>' + (id === 'a-tech' || id === 'cp-book-tech' ? 'Any Available' : 'Next Available') + '</option>';
     DB.techs.forEach(function(t) {
       var o = document.createElement('option');
       o.value = t.name; o.textContent = t.name;
@@ -940,10 +1497,12 @@ function populateTechSelects() {
 }
 
 function populateServiceSelects() {
-  ['a-service','w-service'].forEach(function(id) {
+  ['a-service','w-service','cp-book-service'].forEach(function(id) {
     var s = $(id); if (!s) return;
     s.innerHTML = DB.services.map(function(sv) {
-      return '<option value="' + sv.price + '">' + sv.name + ' — $' + sv.price + '</option>';
+      return id === 'cp-book-service'
+        ? '<option value="' + sv.id + '">' + sv.name + ' — $' + sv.price + '</option>'
+        : '<option value="' + sv.price + '">' + sv.name + ' — $' + sv.price + '</option>';
     }).join('');
   });
 }
@@ -958,6 +1517,7 @@ function saveAppt() {
     id: Date.now(),
     client:  $('a-client').value || 'Guest',
     phone:   $('a-phone').value,
+    email:   $('a-email') ? $('a-email').value : '',
     service: svcName,
     price:   price,
     tech:    $('a-tech').value,
@@ -1115,6 +1675,12 @@ function completeCheckout() {
   }
   // Update client stats
   var client = DB.clients.find(function(cl) { return cl.name === a.client; });
+  if (!client && a.customerUserId) {
+    client = DB.clients.find(function(cl) { return cl.customerUserId === a.customerUserId; });
+  }
+  if (!client && a.email) {
+    client = DB.clients.find(function(cl) { return normalizeEmail(cl.email) === normalizeEmail(a.email); });
+  }
   if (client) {
     client.visits++;
     client.spent = Math.round((client.spent + total) * 100) / 100;
@@ -1190,6 +1756,7 @@ function renderWalkin() {
 function saveClient() {
   DB.clients.push({
     id: Date.now(),
+    customerUserId: null,
     name:    $('c-name').value,
     phone:   $('c-phone').value,
     email:   $('c-email').value,
@@ -1408,7 +1975,7 @@ function deleteInspo(id) {
 // ── STAFF MANAGEMENT ──────────────────────────────
 function renderStaff() {
   var el = $('staffTable'); if (!el) return;
-  el.innerHTML = DB.users.map(function(u) {
+  el.innerHTML = DB.users.filter(function(u) { return u.role !== 'customer'; }).map(function(u) {
     return '<tr>'
       + '<td><b>' + u.name + '</b></td>'
       + '<td>' + u.email + '</td>'
@@ -1425,7 +1992,7 @@ function addStaff() {
   var pass  = $('st-pass').value;
   var role  = $('st-role').value;
   if (!name || !email || !pass) { showToast('All fields required', 'error'); return; }
-  if (DB.users.find(function(u) { return u.email === email; })) {
+  if (DB.users.find(function(u) { return normalizeEmail(u.email) === normalizeEmail(email); })) {
     showToast('Email already exists', 'error'); return;
   }
   DB.users.push({ id: Date.now(), name: name, email: email, password: pass, role: role });
@@ -1696,9 +2263,9 @@ function importNailGlowData(ev) {
       }
       if (needsOwnerPasswordSetup()) {
         currentUser = null;
-        showSetupScreen();
+        showLanding();
       } else if (!currentUser) {
-        showLogin();
+        showLanding();
       } else {
         if ($('current-user-name')) $('current-user-name').textContent = currentUser.name;
         if ($('current-user-role')) $('current-user-role').textContent = ROLES[currentUser.role] || currentUser.role;
@@ -1717,6 +2284,8 @@ function importNailGlowData(ev) {
       renderReports();
       updateDashboard();
       applyRolePermissions();
+      renderLanding();
+      renderCustomerPortalProfile();
       showToast('Import complete', 'success');
     } catch (err) {
       showToast('Import failed: ' + err.message, 'error');
@@ -1730,17 +2299,19 @@ function importNailGlowData(ev) {
 window.addEventListener('DOMContentLoaded', function() {
   try {
     loadDB();
-    if (needsOwnerPasswordSetup()) {
-      showSetupScreen();
-    } else {
-      showLogin();
-    }
+    restoreCustomerSession();
+    showLanding();
     var dateEl = $('a-date');
     if (dateEl) dateEl.value = today();
+    var cpDateEl = $('cp-book-date');
+    if (cpDateEl) cpDateEl.value = today();
     populateServiceSelects();
+    populateTechSelects();
     renderServices();
     renderProducts();
     renderInspo();
+    renderLanding();
+    renderCustomerPortalProfile();
   } catch(e) {
     console.warn('Init error:', e.message);
   }

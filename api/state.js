@@ -1,3 +1,4 @@
+import { parseSession, sanitizeUser, authConfigured } from "./_lib/auth.js";
 import { ensureSchema, getSql, sendJson } from "./_lib/db.js";
 
 const STATE_KEY = "nailglow-default";
@@ -34,10 +35,23 @@ export default async function handler(req, res) {
       });
       return;
     }
+    if (!authConfigured()) {
+      sendJson(res, 503, {
+        ok: false,
+        error: "AUTH_SECRET is not configured.",
+        neon: true
+      });
+      return;
+    }
 
     await ensureSchema(sql);
+    const session = parseSession(req);
 
     if (req.method === "GET") {
+      if (!session || session.role === "customer") {
+        sendJson(res, 401, { ok: false, error: "Authentication required." });
+        return;
+      }
       const rows = await sql`
         select payload, updated_at
         from app_state
@@ -54,6 +68,10 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "PUT" || req.method === "POST") {
+      if (!session || session.role === "customer") {
+        sendJson(res, 401, { ok: false, error: "Authentication required." });
+        return;
+      }
       let body;
       try {
         body = await readBody(req);

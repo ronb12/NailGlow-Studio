@@ -963,6 +963,27 @@ function canUseRemoteState() {
     /^https?:$/i.test(window.location.protocol);
 }
 
+async function fetchAdminRemoteState() {
+  if (!canUseRemoteState()) return false;
+  try {
+    var res = await fetch(STATE_API_PATH, { headers: { accept: 'application/json' }, credentials: 'include' });
+    if (!res.ok) return false;
+    var payload = await res.json();
+    if (!payload || !payload.ok || !payload.state) return false;
+    mergeHostedState(payload.state);
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(DB));
+    } catch (e) {
+      console.warn('NailGlow admin cache sync:', e.message);
+    }
+    applyRuntimeRefresh();
+    return true;
+  } catch (e) {
+    console.warn('NailGlow fetchAdminRemoteState:', e.message);
+    return false;
+  }
+}
+
 function mergeHostedState(source) {
   DB = JSON.parse(JSON.stringify(DEFAULT_DATA));
   var parsed = source || {};
@@ -1000,34 +1021,39 @@ function applyRuntimeRefresh() {
 async function hydrateRemoteState() {
   if (!canUseRemoteState()) return;
   try {
-    var res = await fetch(STATE_API_PATH, { headers: { accept: 'application/json' } });
-    if (!res.ok) return;
-    var payload = await res.json();
-    if (payload && payload.ok && payload.state && typeof payload.state === 'object') {
-      mergeHostedState(payload.state);
-      try {
-        localStorage.setItem(STORE_KEY, JSON.stringify(DB));
-      } catch (e) {
-        console.warn('NailGlow hydrate local cache:', e.message);
+    var publicRes = await fetch('/api/public-state', { headers: { accept: 'application/json' } });
+    if (publicRes.ok) {
+      var publicPayload = await publicRes.json();
+      if (publicPayload && publicPayload.ok && publicPayload.state) {
+        DB.services = publicPayload.state.services || DB.services;
+        DB.techs = publicPayload.state.techs || DB.techs;
+        DB.settings = Object.assign({}, DB.settings, publicPayload.state.settings || {});
+        renderLanding();
+        populateServiceSelects();
+        populateTechSelects();
       }
-      currentCustomer = restoreCustomerSession();
-      applyRuntimeRefresh();
-      return;
     }
-    var hasLocalData =
-      DB.appointments.length || DB.clients.length || DB.techs.length || DB.walkin.length || DB.transactions.length || DB.inspo.length;
-    if (hasLocalData) await syncStateToRemote();
+    var authRes = await fetch('/api/auth', { headers: { accept: 'application/json' }, credentials: 'include' });
+    if (authRes.ok) {
+      var authPayload = await authRes.json();
+      if (authPayload && authPayload.ok && authPayload.authenticated && authPayload.user) {
+        currentUser = authPayload.user;
+        await fetchAdminRemoteState();
+        return;
+      }
+    }
   } catch (e) {
     console.warn('NailGlow hydrateRemoteState:', e.message);
   }
 }
 
 async function syncStateToRemote() {
-  if (!canUseRemoteState()) return false;
+  if (!canUseRemoteState() || !currentUser) return false;
   try {
     var res = await fetch(STATE_API_PATH, {
       method: 'PUT',
       headers: { 'content-type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ state: DB })
     });
     return res.ok;
@@ -1511,6 +1537,33 @@ function completeOwnerPasswordSetup() {
     if (err) err.textContent = 'No owner account.';
     return;
   }
+  if (canUseRemoteState()) {
+    fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ action: 'setupOwner', password: p1 })
+    }).then(function(res) {
+      return res.json().then(function(payload) { return { status: res.status, payload: payload }; });
+    }).then(async function(result) {
+      if (result.status >= 400 || !result.payload.ok) {
+        if (err) err.textContent = result.payload.error || 'Could not finish setup.';
+        return;
+      }
+      currentUser = result.payload.user || null;
+      document.getElementById('setup-pass').value = '';
+      document.getElementById('setup-pass2').value = '';
+      await fetchAdminRemoteState();
+      if ($('current-user-name') && currentUser) $('current-user-name').textContent = currentUser.name;
+      if ($('current-user-role') && currentUser) $('current-user-role').textContent = ROLES[currentUser.role] || currentUser.role;
+      hideLogin();
+      applyRolePermissions();
+      showToast('Owner password saved.', 'success');
+    }).catch(function(error) {
+      if (err) err.textContent = error.message || 'Could not finish setup.';
+    });
+    return;
+  }
   owner.password = p1;
   saveDB();
   document.getElementById('setup-pass').value = '';
@@ -1528,6 +1581,33 @@ function hideLogin() {
 function doLogin() {
   var email = document.getElementById('login-email').value.trim().toLowerCase();
   var pass  = document.getElementById('login-pass').value;
+  if (canUseRemoteState()) {
+    fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ action: 'login', email: email, password: pass })
+    }).then(function(res) {
+      return res.json().then(function(payload) { return { status: res.status, payload: payload }; });
+    }).then(async function(result) {
+      if (result.status >= 400 || !result.payload.ok) {
+        document.getElementById('login-err').textContent = result.payload.error || 'Invalid email or password.';
+        return;
+      }
+      currentUser = result.payload.user || null;
+      currentCustomer = null;
+      persistCustomerSession();
+      document.getElementById('login-err').textContent = '';
+      if ($('current-user-name') && currentUser) $('current-user-name').textContent = currentUser.name;
+      if ($('current-user-role') && currentUser) $('current-user-role').textContent = ROLES[currentUser.role] || currentUser.role;
+      await fetchAdminRemoteState();
+      hideLogin();
+      applyRolePermissions();
+    }).catch(function(error) {
+      document.getElementById('login-err').textContent = error.message || 'Login failed.';
+    });
+    return;
+  }
   var user  = DB.users.find(function(u) { return u.role !== 'customer' && u.email.toLowerCase() === email; });
   if (!user || user.password == null || user.password === '' || user.password !== pass) {
     document.getElementById('login-err').textContent = (!user || user.password == null || user.password === '')
@@ -1552,6 +1632,14 @@ function doLogin() {
 
 function doLogout() {
   currentUser = null;
+  if (canUseRemoteState()) {
+    fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ action: 'logout' })
+    }).catch(function() {});
+  }
   showLanding();
 }
 

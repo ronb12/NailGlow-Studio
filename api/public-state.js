@@ -1,6 +1,5 @@
 import { ensureSchema, getSql, sendJson } from "./_lib/db.js";
-
-const STATE_KEY = "nailglow-default";
+import { loadState } from "./_lib/state.js";
 
 export default async function handler(_req, res) {
   try {
@@ -10,13 +9,7 @@ export default async function handler(_req, res) {
       return;
     }
     await ensureSchema(sql);
-    const rows = await sql`
-      select payload
-      from app_state
-      where state_key = ${STATE_KEY}
-      limit 1
-    `;
-    const state = rows[0]?.payload || null;
+    const state = await loadState(sql);
     if (!state) {
       sendJson(res, 200, { ok: true, state: null });
       return;

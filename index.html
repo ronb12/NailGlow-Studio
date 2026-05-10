@@ -863,6 +863,8 @@ td{padding:10px 14px;font-size:0.85rem;}
 const STORE_KEY = 'nailglow_v1';
 const CUSTOMER_SESSION_KEY = 'nailglow_customer_session';
 const STATE_API_PATH = '/api/state';
+const CUSTOMER_AUTH_API_PATH = '/api/customer-auth';
+const CUSTOMER_PORTAL_API_PATH = '/api/customer-portal';
 const ROLES = { owner: 'Owner', manager: 'Manager', tech: 'Technician', customer: 'Customer' };
 
 // ── DEFAULT DATA ──────────────────────────────────
@@ -1082,6 +1084,7 @@ function customerUsers() {
 }
 
 function persistCustomerSession() {
+  if (canUseRemoteState()) return;
   try {
     if (currentCustomer && currentCustomer.id) localStorage.setItem(CUSTOMER_SESSION_KEY, String(currentCustomer.id));
     else localStorage.removeItem(CUSTOMER_SESSION_KEY);
@@ -1091,6 +1094,7 @@ function persistCustomerSession() {
 }
 
 function restoreCustomerSession() {
+  if (canUseRemoteState()) return null;
   try {
     var raw = localStorage.getItem(CUSTOMER_SESSION_KEY);
     if (!raw) return null;
@@ -1102,6 +1106,79 @@ function restoreCustomerSession() {
     console.warn('Customer session restore failed:', e.message);
     return null;
   }
+}
+
+function syncCustomerDataFromPortal(payload) {
+  if (!payload) return;
+  if (payload.user) {
+    currentCustomer = payload.user;
+    var userIndex = DB.users.findIndex(function(u) {
+      return Number(u.id) === Number(payload.user.id) || normalizeEmail(u.email) === normalizeEmail(payload.user.email);
+    });
+    if (userIndex >= 0) DB.users[userIndex] = Object.assign({}, DB.users[userIndex], payload.user, { role: 'customer' });
+    else DB.users.push(Object.assign({ role: 'customer' }, payload.user));
+  } else {
+    currentCustomer = null;
+  }
+  if (payload.client) {
+    var clientIndex = DB.clients.findIndex(function(cl) {
+      return (payload.client.customerUserId && cl.customerUserId === payload.client.customerUserId)
+        || (normalizeEmail(cl.email) && normalizeEmail(cl.email) === normalizeEmail(payload.client.email));
+    });
+    if (clientIndex >= 0) DB.clients[clientIndex] = Object.assign({}, DB.clients[clientIndex], payload.client);
+    else DB.clients.push(payload.client);
+  }
+  if (Array.isArray(payload.appointments)) {
+    var keep = DB.appointments.filter(function(appt) {
+      if (!currentCustomer) return true;
+      var matchesUser = (appt.customerUserId && Number(appt.customerUserId) === Number(currentCustomer.id))
+        || (normalizeEmail(appt.email) && normalizeEmail(appt.email) === normalizeEmail(currentCustomer.email))
+        || ((appt.client || '').trim().toLowerCase() === (currentCustomer.name || '').trim().toLowerCase()
+          && String(appt.phone || '') === String(currentCustomer.phone || ''));
+      return !matchesUser;
+    });
+    DB.appointments = keep.concat(payload.appointments);
+  }
+}
+
+async function fetchCustomerPortalState() {
+  if (!canUseRemoteState()) return false;
+  try {
+    var res = await fetch(CUSTOMER_AUTH_API_PATH, { headers: { accept: 'application/json' }, credentials: 'include' });
+    if (!res.ok) return false;
+    var payload = await res.json();
+    if (!payload || !payload.ok || !payload.authenticated || !payload.user) {
+      currentCustomer = null;
+      return false;
+    }
+    syncCustomerDataFromPortal(payload);
+    return true;
+  } catch (e) {
+    console.warn('NailGlow fetchCustomerPortalState:', e.message);
+    return false;
+  }
+}
+
+async function runCustomerAuth(action, body) {
+  var res = await fetch(CUSTOMER_AUTH_API_PATH, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(Object.assign({ action: action }, body || {}))
+  });
+  var payload = await res.json();
+  return { status: res.status, payload: payload };
+}
+
+async function runCustomerPortalAction(action, body) {
+  var res = await fetch(CUSTOMER_PORTAL_API_PATH, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(Object.assign({ action: action }, body || {}))
+  });
+  var payload = await res.json();
+  return { status: res.status, payload: payload };
 }
 
 function findClientForCustomer(user) {
@@ -1296,10 +1373,13 @@ function showCustomerPortal() {
   hideAllEntryScreens();
   var portal = $('customerPortalScreen');
   if (portal) portal.style.display = 'block';
-  restoreCustomerSession();
+  if (!canUseRemoteState()) restoreCustomerSession();
   populateServiceSelects();
   populateTechSelects();
   renderCustomerPortalProfile();
+  if (canUseRemoteState()) fetchCustomerPortalState().then(function() {
+    renderCustomerPortalProfile();
+  });
 }
 
 function customerLogin() {
@@ -1307,6 +1387,21 @@ function customerLogin() {
   var pass = $('cp-login-pass').value;
   var err = $('cp-login-err');
   if (err) err.textContent = '';
+  if (canUseRemoteState()) {
+    runCustomerAuth('login', { email: email, password: pass }).then(function(result) {
+      if (result.status >= 400 || !result.payload.ok) {
+        if (err) err.textContent = result.payload.error || 'We could not match that email and password.';
+        return;
+      }
+      syncCustomerDataFromPortal(result.payload);
+      if ($('cp-login-pass')) $('cp-login-pass').value = '';
+      renderCustomerPortalProfile();
+      showToast('Welcome back to NailGlow.', 'success');
+    }).catch(function(error) {
+      if (err) err.textContent = error.message || 'Login failed.';
+    });
+    return;
+  }
   var user = customerUsers().find(function(u) { return normalizeEmail(u.email) === email; });
   if (!user || user.password !== pass) {
     if (err) err.textContent = 'We could not match that email and password.';
@@ -1326,6 +1421,22 @@ function createCustomerAccount() {
   var pass = $('cp-pass').value;
   var err = $('cp-signup-err');
   if (err) err.textContent = '';
+  if (canUseRemoteState()) {
+    runCustomerAuth('createAccount', { name: name, phone: phone, email: email, password: pass }).then(function(result) {
+      if (result.status >= 400 || !result.payload.ok) {
+        if (err) err.textContent = result.payload.error || 'Could not create account.';
+        return;
+      }
+      syncCustomerDataFromPortal(result.payload);
+      ['cp-name','cp-phone','cp-email','cp-pass'].forEach(function(id) { if ($(id)) $(id).value = ''; });
+      renderLanding();
+      renderCustomerPortalProfile();
+      showToast('Customer account created.', 'success');
+    }).catch(function(error) {
+      if (err) err.textContent = error.message || 'Could not create account.';
+    });
+    return;
+  }
   if (!name || !phone || !email || pass.length < 8) {
     if (err) err.textContent = 'Add your name, phone, email, and a password with at least 8 characters.';
     return;
@@ -1353,6 +1464,14 @@ function createCustomerAccount() {
 }
 
 function customerLogout() {
+  if (canUseRemoteState()) {
+    fetch(CUSTOMER_AUTH_API_PATH, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ action: 'logout' })
+    }).catch(function() {});
+  }
   currentCustomer = null;
   persistCustomerSession();
   resetCustomerBookingForm();
@@ -1379,6 +1498,23 @@ function beginCustomerReschedule(id) {
 function cancelCustomerAppt(id) {
   var appt = DB.appointments.find(function(a) { return a.id === id; });
   if (!appt || !currentCustomer) return;
+  if (canUseRemoteState()) {
+    runCustomerPortalAction('cancelAppointment', { appointmentId: id }).then(function(result) {
+      if (result.status >= 400 || !result.payload.ok) {
+        showToast(result.payload.error || 'Could not cancel appointment.', 'error');
+        return;
+      }
+      syncCustomerDataFromPortal(result.payload);
+      renderAppts();
+      updateDashboard();
+      if (portalEditingAppointmentId === id) resetCustomerBookingForm();
+      renderCustomerPortalProfile();
+      showToast('Appointment canceled.', 'success');
+    }).catch(function(error) {
+      showToast(error.message || 'Could not cancel appointment.', 'error');
+    });
+    return;
+  }
   appt.status = 'Canceled';
   saveDB();
   renderAppts();
@@ -1405,6 +1541,39 @@ function saveCustomerPortalBooking() {
   var time = $('cp-book-time').value;
   if (!date || !time) {
     if (err) err.textContent = 'Choose a date and time.';
+    return;
+  }
+  if (canUseRemoteState()) {
+    var wasEditingPortalBooking = !!portalEditingAppointmentId;
+    runCustomerPortalAction('saveAppointment', {
+      appointmentId: portalEditingAppointmentId || null,
+      serviceId: serviceId,
+      tech: $('cp-book-tech').value,
+      date: date,
+      time: time,
+      color: $('cp-book-color').value,
+      email: $('cp-book-email').value,
+      notes: $('cp-book-notes').value,
+      phone: String(currentCustomer.phone || $('cp-phone').value || '').trim()
+    }).then(function(result) {
+      if (result.status >= 400 || !result.payload.ok) {
+        if (err) err.textContent = result.payload.error || 'Could not save appointment.';
+        return;
+      }
+      syncCustomerDataFromPortal(result.payload);
+      renderAppts();
+      renderClients('');
+      updateDashboard();
+      resetCustomerBookingForm();
+      renderCustomerPortalProfile();
+      if (currentCustomer && currentCustomer.email) {
+        var saved = (result.payload.appointments || []).slice().sort(function(a, b) { return Number(b.id) - Number(a.id); })[0];
+        if (saved) sendEmailConfirmation(saved, currentCustomer.email);
+      }
+      showToast(wasEditingPortalBooking ? 'Appointment updated.' : 'Appointment booked.', 'success');
+    }).catch(function(error) {
+      if (err) err.textContent = error.message || 'Could not save appointment.';
+    });
     return;
   }
   currentCustomer.phone = String(currentCustomer.phone || $('cp-phone').value || '').trim();
@@ -2517,7 +2686,7 @@ function importNailGlowData(ev) {
 window.addEventListener('DOMContentLoaded', function() {
   try {
     loadDB();
-    restoreCustomerSession();
+    if (!canUseRemoteState()) restoreCustomerSession();
     showLanding();
     var dateEl = $('a-date');
     if (dateEl) dateEl.value = today();

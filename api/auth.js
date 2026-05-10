@@ -1,7 +1,6 @@
 import { clearSessionCookie, parseSession, sanitizeUser, setSessionCookie, verifyPassword, hashPassword, authConfigured } from "./_lib/auth.js";
 import { ensureSchema, getSql, sendJson } from "./_lib/db.js";
-
-const STATE_KEY = "nailglow-default";
+import { loadState, saveState } from "./_lib/state.js";
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -21,27 +20,6 @@ function readBody(req) {
   });
 }
 
-async function loadState(sql) {
-  await ensureSchema(sql);
-  const rows = await sql`
-    select payload
-    from app_state
-    where state_key = ${STATE_KEY}
-    limit 1
-  `;
-  return rows[0]?.payload || null;
-}
-
-async function saveState(sql, state) {
-  await sql`
-    insert into app_state (state_key, payload, updated_at)
-    values (${STATE_KEY}, ${JSON.stringify(state)}, now())
-    on conflict (state_key) do update set
-      payload = excluded.payload,
-      updated_at = now()
-  `;
-}
-
 export default async function handler(req, res) {
   try {
     const sql = getSql();
@@ -54,6 +32,7 @@ export default async function handler(req, res) {
       return;
     }
 
+    await ensureSchema(sql);
     const state = await loadState(sql);
     if (!state) {
       sendJson(res, 503, { ok: false, error: "State is not initialized yet." });

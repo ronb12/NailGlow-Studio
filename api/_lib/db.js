@@ -18,13 +18,20 @@ export function getSql() {
 export async function ensureSchema(sql) {
   if (!sql) return;
   schemaReady ||= (async () => {
-    await sql`
-      create table if not exists app_state (
-        state_key text primary key,
-        payload jsonb not null default '{}'::jsonb,
-        updated_at timestamptz not null default now()
-      )
-    `;
+    try {
+      await sql`
+        create table if not exists app_state (
+          state_key text primary key,
+          payload jsonb not null default '{}'::jsonb,
+          updated_at timestamptz not null default now()
+        )
+      `;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!/pg_type_typname_nsp_index|already exists|duplicate key value/i.test(message)) {
+        throw error;
+      }
+    }
   })();
   await schemaReady;
 }

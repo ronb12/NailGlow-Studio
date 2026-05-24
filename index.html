@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3565666509316178" crossorigin="anonymous"></script>
+<meta name="google-adsense-account" content="ca-pub-3565666509316178">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#9c1458">
@@ -924,6 +925,7 @@ var selectedColors = [];
 var pendingRecurring = null;
 var remoteSyncTimer = null;
 var remoteSyncPromise = Promise.resolve();
+var hostedOwnerSetupRequired = null;
 
 // ── LOCALSTORAGE ──────────────────────────────────
 function saveDB() {
@@ -1030,6 +1032,7 @@ async function hydrateRemoteState() {
         DB.services = publicPayload.state.services || DB.services;
         DB.techs = publicPayload.state.techs || DB.techs;
         DB.settings = Object.assign({}, DB.settings, publicPayload.state.settings || {});
+        hostedOwnerSetupRequired = !!publicPayload.state.ownerSetupRequired;
         renderLanding();
         populateServiceSelects();
         populateTechSelects();
@@ -1275,6 +1278,21 @@ function showLanding() {
 }
 
 function beginOwnerAccess() {
+  if (canUseRemoteState() && hostedOwnerSetupRequired === null) {
+    fetch('/api/public-state', { headers: { accept: 'application/json' } })
+      .then(function(res) { return res.ok ? res.json() : null; })
+      .then(function(payload) {
+        if (payload && payload.ok && payload.state) {
+          hostedOwnerSetupRequired = !!payload.state.ownerSetupRequired;
+        }
+      })
+      .catch(function() {})
+      .finally(function() {
+        if (needsOwnerPasswordSetup()) showSetupScreen();
+        else showLogin();
+      });
+    return;
+  }
   if (needsOwnerPasswordSetup()) showSetupScreen();
   else showLogin();
 }
@@ -1633,6 +1651,7 @@ function showToast(msg, type) {
 
 // ── LOGIN SYSTEM ──────────────────────────────────
 function needsOwnerPasswordSetup() {
+  if (canUseRemoteState() && hostedOwnerSetupRequired !== null) return hostedOwnerSetupRequired;
   return DB.users.some(function(u) { return u.role === 'owner' && (u.password == null || u.password === ''); });
 }
 
@@ -1720,6 +1739,7 @@ function completeOwnerPasswordSetup() {
         return;
       }
       currentUser = result.payload.user || null;
+      hostedOwnerSetupRequired = false;
       document.getElementById('setup-pass').value = '';
       document.getElementById('setup-pass2').value = '';
       await fetchAdminRemoteState();
